@@ -32,10 +32,10 @@ export const siteConfig = {
   url: resolvedSiteUrl,
 
   homeTitle:
-    "Escort İlanları",
+    "Beylikdüzü Escort İlanları",
 
   description:
-    "İstanbul genelindeki escort ilanlarını inceleyin. İlan sahipleriyle doğrudan iletişime geçin.",
+    "İstanbul genelindeki escort ilanlarını inceleyin. İlan sahipleriyle doğrudan iletişime geçin. Beylikdüzü Escort, Avcılar Escort, Esenyurt Escort",
 
   contactEmail:
     process.env.NEXT_PUBLIC_CONTACT_EMAIL?.trim() ||
@@ -43,7 +43,7 @@ export const siteConfig = {
 
   contactWhatsapp:
     process.env.NEXT_PUBLIC_CONTACT_WHATSAPP?.trim() ||
-    "",
+    "05344385541",
 } as const;
 
 export function absoluteUrl(

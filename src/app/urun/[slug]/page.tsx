@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 
@@ -6,6 +7,11 @@ import { ProductGallery } from "@/components/ProductGallery";
 import { WhatsappButton } from "@/components/WhatsappButton";
 import { getProductCategoryConfig } from "@/lib/product-categories";
 import prisma from "@/lib/prisma";
+import {
+  absoluteUrl,
+  serializeJsonLd,
+  siteConfig,
+} from "@/lib/site-config";
 
 export const dynamic = "force-dynamic";
 
@@ -20,6 +26,57 @@ type ProductDetailTable = {
   hasHeader: boolean;
   rows: string[][];
 };
+
+type ProductSeoRecord = {
+  name: string;
+  shortDescription: string | null;
+  description: string | null;
+};
+
+function cleanSeoText(value: string): string {
+  return value
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+function createProductSeoDescription(
+  product: ProductSeoRecord,
+): string {
+  const source =
+    product.shortDescription ||
+    product.description ||
+    `${product.name} ilanı hakkında güncel bilgi ve iletişim detayları.`;
+
+  const cleanedSource =
+    cleanSeoText(source);
+
+  if (cleanedSource.length <= 155) {
+    return cleanedSource;
+  }
+
+  return `${cleanedSource.slice(0, 152).trim()}...`;
+}
+
+function getVisibleProductWhere(
+  slug: string,
+  now: Date,
+) {
+  return {
+    slug,
+    isActive: true,
+    OR: [
+      {
+        subscriptionEndsAt: null,
+      },
+      {
+        subscriptionEndsAt: {
+          gt: now,
+        },
+      },
+    ],
+  };
+}
+
 
 function createDailyListingViewCount(
   date: Date,
@@ -180,6 +237,90 @@ function getDetailTheme(
   }
 }
 
+export async function generateMetadata({
+  params,
+}: ProductPageProps): Promise<Metadata> {
+  const { slug } = await params;
+  const now = new Date();
+
+  const product =
+    await prisma.product.findFirst({
+      where: getVisibleProductWhere(
+        slug,
+        now,
+      ),
+      select: {
+        name: true,
+        slug: true,
+        category: true,
+        coverImage: true,
+        shortDescription: true,
+        description: true,
+      },
+    });
+
+  if (!product) {
+    return {
+      title: "İlan bulunamadı",
+      robots: {
+        index: false,
+        follow: false,
+      },
+    };
+  }
+
+  const categoryInformation =
+    getProductCategoryConfig(
+      product.category,
+    );
+
+  const description =
+    createProductSeoDescription(product);
+
+  const title =
+    `${product.name} | ${categoryInformation.label} İlan | ${siteConfig.name}`;
+
+  const url = absoluteUrl(
+    `/urun/${product.slug}`,
+  );
+
+  return {
+    title,
+    description,
+    alternates: {
+      canonical: `/urun/${product.slug}`,
+    },
+    openGraph: {
+      type: "article",
+      locale: "tr_TR",
+      url,
+      siteName: siteConfig.name,
+      title,
+      description,
+      images: product.coverImage
+        ? [
+            {
+              url: product.coverImage,
+              alt: `${product.name} görseli`,
+            },
+          ]
+        : undefined,
+    },
+    twitter: {
+      card: "summary_large_image",
+      title,
+      description,
+      images: product.coverImage
+        ? [product.coverImage]
+        : undefined,
+    },
+    robots: {
+      index: true,
+      follow: true,
+    },
+  };
+}
+
 function parseProductDetailTable(
   value: unknown,
 ): ProductDetailTable | null {
@@ -276,20 +417,10 @@ export default async function ProductPage({
    */
   const product =
     await prisma.product.findFirst({
-      where: {
+      where: getVisibleProductWhere(
         slug,
-        isActive: true,
-        OR: [
-          {
-            subscriptionEndsAt: null,
-          },
-          {
-            subscriptionEndsAt: {
-              gt: now,
-            },
-          },
-        ],
-      },
+        now,
+      ),
       include: {
         images: {
           orderBy: {
@@ -373,6 +504,57 @@ export default async function ProductPage({
       ? detailTable.rows.slice(1)
       : detailTable?.rows ?? [];
 
+  const productUrl = absoluteUrl(
+    `/urun/${product.slug}`,
+  );
+
+  const productSeoDescription =
+    createProductSeoDescription(product);
+
+  const serviceJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "Service",
+    name: product.name,
+    description: productSeoDescription,
+    category: categoryInformation.label,
+    image: galleryImages,
+    url: productUrl,
+    provider: {
+      "@type": "Organization",
+      name: siteConfig.name,
+      url: siteConfig.url,
+    },
+    areaServed: {
+      "@type": "Country",
+      name: "Türkiye",
+    },
+  };
+
+  const breadcrumbJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: [
+      {
+        "@type": "ListItem",
+        position: 1,
+        name: "Ana sayfa",
+        item: siteConfig.url,
+      },
+      {
+        "@type": "ListItem",
+        position: 2,
+        name: categoryInformation.label,
+        item: `${siteConfig.url}/#${categoryInformation.key}`,
+      },
+      {
+        "@type": "ListItem",
+        position: 3,
+        name: product.name,
+        item: productUrl,
+      },
+    ],
+  };
+
   return (
     <div
       className="min-h-screen overflow-x-hidden bg-[#f4f4f0]"
@@ -385,6 +567,22 @@ export default async function ProductPage({
         eventType="PRODUCT_VIEW"
         productId={product.id}
         heartbeat={false}
+      />
+
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html:
+            serializeJsonLd(serviceJsonLd),
+        }}
+      />
+
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html:
+            serializeJsonLd(breadcrumbJsonLd),
+        }}
       />
 
       <header className="sticky top-0 z-30 border-b border-white/10 bg-black/95 shadow-[0_8px_30px_rgba(0,0,0,0.18)] backdrop-blur-xl">
@@ -562,8 +760,8 @@ export default async function ProductPage({
                           <tbody className="divide-y divide-neutral-100">
                             {tableBodyRows.map(
                               (
-                                row,
-                                rowIndex,
+                                row: string[],
+                                rowIndex: number,
                               ) => (
                                 <tr
                                   key={`row-${rowIndex}`}
@@ -571,8 +769,8 @@ export default async function ProductPage({
                                 >
                                   {row.map(
                                     (
-                                      cell,
-                                      cellIndex,
+                                      cell: string,
+                                      cellIndex: number,
                                     ) => (
                                       <td
                                         key={`cell-${rowIndex}-${cellIndex}`}

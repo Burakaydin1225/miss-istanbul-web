@@ -456,7 +456,7 @@ export default async function HomePage() {
     "@context": "https://schema.org",
     "@type": "ItemList",
     name:
-      "Güncel eskort araç ve ağır nakliye destek aracı ilanları",
+      "Güncel escort ilanları , Beylikdüzü Escort, Avcılar Escort, Esenyurt Escort",
     numberOfItems:
       Math.min(
         visibleProducts.length,
@@ -500,13 +500,13 @@ export default async function HomePage() {
       <main className="mx-auto max-w-5xl px-3 pb-14 pt-5 sm:px-4 sm:pt-7">
         <section className="sr-only">
           <h1>
-            Eskort araç ve ağır nakliye destek
-            aracı ilanları
+            Escort İlanları
+            Beylikdüzü Escort ilanları
           </h1>
 
           <p>
-            Türkiye genelinde pilot, öncü ve
-            destek aracı ilanlarını inceleyin.
+            İstanbul genelinde escort
+            ilanlarını inceleyin.
           </p>
         </section>
 
