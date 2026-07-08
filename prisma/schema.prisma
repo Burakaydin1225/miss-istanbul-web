@@ -59,7 +59,17 @@ model Product {
   description      String
   detailTable      Json?
   coverImage       String
-  whatsappNumber   String?
+  cardTag          String?
+
+  /*
+   * Eski tekil WhatsApp alanı şimdilik korunuyor.
+   * Yeni sistem ProductWhatsappButton tablosu üzerinden
+   * sınırsız buton destekler.
+   *
+   * Mevcut eski kayıtlar bozulmasın diye bu alanı
+   * ileride temiz migration ile kaldırabiliriz.
+   */
+  whatsappNumber String?
 
   category  ProductCategory @default(VIP)
   sortOrder Int             @default(1)
@@ -73,6 +83,7 @@ model Product {
   updatedAt DateTime @updatedAt
 
   images          ProductImage[]
+  whatsappButtons ProductWhatsappButton[]
   analyticsEvents AnalyticsEvent[]
   payments        ProductPayment[]
 
@@ -80,6 +91,22 @@ model Product {
   @@index([category, isActive, sortOrder])
   @@index([subscriptionEndsAt])
   @@index([createdAt])
+}
+
+model ProductWhatsappButton {
+  id          String   @id @default(cuid())
+  productId   String
+  label       String   @default("WhatsApp ile bilgi al")
+  phoneNumber String
+  sortOrder   Int      @default(0)
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  product Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@index([productId, sortOrder])
+  @@index([isActive])
 }
 
 model ProductImage {
@@ -134,8 +161,16 @@ model SiteSettings {
   logoUrl         String?
   headline        String   @default("Ürünlerimiz")
   description     String   @default("Detaylarını incelemek istediğiniz ürüne dokunun.")
+
+  /*
+   * Ana WhatsApp numarası:
+   * - Anasayfadaki reklam alanları
+   * - Üründe özel WhatsApp butonu yoksa fallback
+   * - Genel iletişim
+   */
   whatsappNumber  String   @default("905555555555")
   whatsappMessage String   @default("Merhaba, ürün hakkında bilgi almak istiyorum.")
+
   primaryColor    String   @default("#171717")
   updatedAt       DateTime @updatedAt
 }

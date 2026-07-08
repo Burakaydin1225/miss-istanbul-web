@@ -36,6 +36,18 @@ export default async function EditProductPage({
           imageUrl: true,
         },
       },
+      whatsappButtons: {
+        orderBy: {
+          sortOrder: "asc",
+        },
+        select: {
+          id: true,
+          label: true,
+          phoneNumber: true,
+          sortOrder: true,
+          isActive: true,
+        },
+      },
     },
   });
 
@@ -68,8 +80,20 @@ export default async function EditProductPage({
     description: product.description,
     detailTable: product.detailTable,
     coverImage: product.coverImage,
+    cardTag: product.cardTag,
     whatsappNumber:
       product.whatsappNumber,
+    whatsappButtons:
+      product.whatsappButtons.map(
+        (button) => ({
+          id: button.id,
+          label: button.label,
+          phoneNumber:
+            button.phoneNumber,
+          sortOrder: button.sortOrder,
+          isActive: button.isActive,
+        }),
+      ),
     category: product.category,
     sortOrder: product.sortOrder,
     subscriptionFee:

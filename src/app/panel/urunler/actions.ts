@@ -25,13 +25,22 @@ type ProductDetailTable = {
   rows: string[][];
 };
 
+type ProductWhatsappButtonInput = {
+  label: string;
+  phoneNumber: string;
+  sortOrder: number;
+  isActive: boolean;
+};
+
 type ProductFormValues = {
   name: string;
   shortDescription: string | null;
   description: string;
   detailTable: ProductDetailTable | null;
   coverImage: string;
+  cardTag: string | null;
   whatsappNumber: string | null;
+  whatsappButtons: ProductWhatsappButtonInput[];
   category: ProductCategory;
   extraImages: string[];
   sortOrder: number;
@@ -63,6 +72,9 @@ type DetailTableParseResult =
     };
 
 const MAX_POSITION_PER_CATEGORY = 100;
+const MAXIMUM_CARD_TAG_LENGTH = 28;
+const MAXIMUM_WHATSAPP_BUTTONS_PER_PRODUCT = 12;
+const MAXIMUM_WHATSAPP_BUTTON_LABEL_LENGTH = 40;
 
 const MINIMUM_DETAIL_TABLE_ROWS = 2;
 const MAXIMUM_DETAIL_TABLE_ROWS = 12;
@@ -163,6 +175,144 @@ function isValidWhatsappNumber(
     /^\d+$/.test(value) &&
     !/^0+$/.test(value)
   );
+}
+
+
+type WhatsappButtonsParseResult =
+  | {
+      success: true;
+      value: ProductWhatsappButtonInput[];
+    }
+  | {
+      success: false;
+      error: string;
+    };
+
+function parseWhatsappButtons(
+  rawValue: string,
+  legacyWhatsappNumber: string | null,
+): WhatsappButtonsParseResult {
+  const rawButtons = rawValue.trim();
+
+  if (!rawButtons) {
+    return {
+      success: true,
+      value: legacyWhatsappNumber
+        ? [
+            {
+              label: "WhatsApp ile bilgi al",
+              phoneNumber: legacyWhatsappNumber,
+              sortOrder: 0,
+              isActive: true,
+            },
+          ]
+        : [],
+    };
+  }
+
+  let parsedValue: unknown;
+
+  try {
+    parsedValue = JSON.parse(rawButtons);
+  } catch {
+    return {
+      success: false,
+      error:
+        "WhatsApp butonları okunamadı. Sayfayı yenileyip tekrar deneyin.",
+    };
+  }
+
+  if (!Array.isArray(parsedValue)) {
+    return {
+      success: false,
+      error:
+        "WhatsApp butonlarının veri biçimi geçersiz.",
+    };
+  }
+
+  if (
+    parsedValue.length >
+    MAXIMUM_WHATSAPP_BUTTONS_PER_PRODUCT
+  ) {
+    return {
+      success: false,
+      error: `Bir üründe en fazla ${MAXIMUM_WHATSAPP_BUTTONS_PER_PRODUCT} WhatsApp butonu olabilir.`,
+    };
+  }
+
+  const whatsappButtons: ProductWhatsappButtonInput[] = [];
+
+  for (const [index, item] of parsedValue.entries()) {
+    if (
+      !item ||
+      typeof item !== "object" ||
+      Array.isArray(item)
+    ) {
+      continue;
+    }
+
+    const record = item as Record<
+      string,
+      unknown
+    >;
+
+    const rawPhoneNumber =
+      typeof record.phoneNumber === "string"
+        ? record.phoneNumber.trim()
+        : "";
+
+    /*
+     * Numarası boş olan satırları yok sayıyoruz.
+     * Böylece yeni ürün formunda varsayılan boş satır
+     * hata üretmeden kalabilir.
+     */
+    if (!rawPhoneNumber) {
+      continue;
+    }
+
+    const phoneNumber =
+      normalizeWhatsappNumber(rawPhoneNumber);
+
+    if (!isValidWhatsappNumber(phoneNumber)) {
+      return {
+        success: false,
+        error: `${index + 1}. WhatsApp butonunda geçerli bir numara girin. Örnek: +90 555 555 55 55`,
+      };
+    }
+
+    const rawLabel =
+      typeof record.label === "string"
+        ? record.label.trim()
+        : "";
+
+    const label =
+      rawLabel ||
+      (index === 0
+        ? "WhatsApp ile bilgi al"
+        : `WhatsApp ${index + 1}`);
+
+    if (
+      label.length >
+      MAXIMUM_WHATSAPP_BUTTON_LABEL_LENGTH
+    ) {
+      return {
+        success: false,
+        error: `${index + 1}. WhatsApp butonu başlığı en fazla ${MAXIMUM_WHATSAPP_BUTTON_LABEL_LENGTH} karakter olabilir.`,
+      };
+    }
+
+    whatsappButtons.push({
+      label,
+      phoneNumber,
+      sortOrder: whatsappButtons.length,
+      isActive: record.isActive !== false,
+    });
+  }
+
+  return {
+    success: true,
+    value: whatsappButtons,
+  };
 }
 
 function normalizeSubscriptionFee(
@@ -534,15 +684,43 @@ function readProductForm(
     formData.get("coverImage") ?? "",
   ).trim();
 
+  const cardTag =
+    String(formData.get("cardTag") ?? "")
+      .trim() || null;
+
   const rawWhatsappNumber = String(
     formData.get("whatsappNumber") ?? "",
   ).trim();
 
-  const whatsappNumber = rawWhatsappNumber
+  const legacyWhatsappNumber = rawWhatsappNumber
     ? normalizeWhatsappNumber(
         rawWhatsappNumber,
       )
     : null;
+
+  const whatsappButtonsResult =
+    parseWhatsappButtons(
+      String(
+        formData.get("whatsappButtons") ?? "",
+      ),
+      legacyWhatsappNumber,
+    );
+
+  if (!whatsappButtonsResult.success) {
+    return {
+      success: false,
+      error: whatsappButtonsResult.error,
+    };
+  }
+
+  const whatsappButtons =
+    whatsappButtonsResult.value;
+
+  const whatsappNumber =
+    whatsappButtons.find(
+      (button) => button.isActive,
+    )?.phoneNumber ??
+    legacyWhatsappNumber;
 
   const rawCategory = String(
     formData.get("category") ?? "",
@@ -634,6 +812,16 @@ function readProductForm(
   }
 
   if (
+    cardTag &&
+    cardTag.length > MAXIMUM_CARD_TAG_LENGTH
+  ) {
+    return {
+      success: false,
+      error: `Kart etiketi en fazla ${MAXIMUM_CARD_TAG_LENGTH} karakter olabilir.`,
+    };
+  }
+
+  if (
     extraImages.some(
       (image) =>
         !isValidImageUrl(image),
@@ -697,7 +885,9 @@ function readProductForm(
       detailTable:
         detailTableResult.value,
       coverImage,
+      cardTag,
       whatsappNumber,
+      whatsappButtons,
       category: rawCategory,
       extraImages,
       sortOrder: sortOrderValue,
@@ -1007,6 +1197,8 @@ export async function createProductAction(
 
               coverImage:
                 values.coverImage,
+              cardTag:
+                values.cardTag,
               whatsappNumber:
                 values.whatsappNumber,
               category:
@@ -1032,6 +1224,20 @@ export async function createProductAction(
                       altText: `${values.name} görseli`,
                       sortOrder:
                         imageIndex + 1,
+                    }),
+                  ),
+              },
+              whatsappButtons: {
+                create:
+                  values.whatsappButtons.map(
+                    (button) => ({
+                      label: button.label,
+                      phoneNumber:
+                        button.phoneNumber,
+                      sortOrder:
+                        button.sortOrder,
+                      isActive:
+                        button.isActive,
                     }),
                   ),
               },
@@ -1081,10 +1287,14 @@ export async function createProductAction(
           changes: {
             name: product.name,
             slug: product.slug,
+            cardTag:
+              product.cardTag,
             category:
               product.category,
             whatsappNumber:
               product.whatsappNumber,
+            whatsappButtonCount:
+              values.whatsappButtons.length,
             sortOrder:
               product.sortOrder,
             detailTableEnabled:
@@ -1172,6 +1382,18 @@ export async function updateProductAction(
         images: {
           select: {
             imageUrl: true,
+          },
+        },
+        whatsappButtons: {
+          select: {
+            id: true,
+            label: true,
+            phoneNumber: true,
+            sortOrder: true,
+            isActive: true,
+          },
+          orderBy: {
+            sortOrder: "asc",
           },
         },
       },
@@ -1296,6 +1518,8 @@ export async function updateProductAction(
 
               coverImage:
                 values.coverImage,
+              cardTag:
+                values.cardTag,
               whatsappNumber:
                 values.whatsappNumber,
               category:
@@ -1329,6 +1553,21 @@ export async function updateProductAction(
                     }),
                   ),
               },
+              whatsappButtons: {
+                deleteMany: {},
+                create:
+                  values.whatsappButtons.map(
+                    (button) => ({
+                      label: button.label,
+                      phoneNumber:
+                        button.phoneNumber,
+                      sortOrder:
+                        button.sortOrder,
+                      isActive:
+                        button.isActive,
+                    }),
+                  ),
+              },
             },
           });
 
@@ -1348,8 +1587,12 @@ export async function updateProductAction(
                 existingProduct.category,
               shortDescription:
                 existingProduct.shortDescription,
+              cardTag:
+                existingProduct.cardTag,
               whatsappNumber:
                 existingProduct.whatsappNumber,
+              whatsappButtonCount:
+                existingProduct.whatsappButtons.length,
               sortOrder:
                 existingProduct.sortOrder,
               detailTableEnabled:
@@ -1370,8 +1613,12 @@ export async function updateProductAction(
                 updatedProduct.category,
               shortDescription:
                 updatedProduct.shortDescription,
+              cardTag:
+                updatedProduct.cardTag,
               whatsappNumber:
                 updatedProduct.whatsappNumber,
+              whatsappButtonCount:
+                values.whatsappButtons.length,
               sortOrder:
                 updatedProduct.sortOrder,
               detailTableEnabled:

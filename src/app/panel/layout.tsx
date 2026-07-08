@@ -27,10 +27,7 @@ const roleLabels: Record<UserRole, string> = {
   [UserRole.VIEWER]: "Görüntüleyici",
 };
 
-const roleBadgeClassNames: Record<
-  UserRole,
-  string
-> = {
+const roleBadgeClassNames: Record<UserRole, string> = {
   [UserRole.OWNER]:
     "border-violet-200 bg-violet-50 text-violet-700",
   [UserRole.ADMIN]:
@@ -57,6 +54,9 @@ export default async function PanelLayout({
     isAdmin(user.role);
 
   const canManageCategorySlots =
+    isAdmin(user.role);
+
+  const canManageSiteSettings =
     isAdmin(user.role);
 
   const canViewSystemLogs =
@@ -101,18 +101,14 @@ export default async function PanelLayout({
           <div className="mx-auto flex max-w-7xl gap-2 overflow-x-auto px-4 py-2 sm:px-6">
             <Link
               href="/panel"
-              className={
-                navigationLinkClassName
-              }
+              className={navigationLinkClassName}
             >
               Genel Bakış
             </Link>
 
             <Link
               href="/panel/urunler"
-              className={
-                navigationLinkClassName
-              }
+              className={navigationLinkClassName}
             >
               Ürünler
             </Link>
@@ -120,19 +116,24 @@ export default async function PanelLayout({
             {canManageCategorySlots ? (
               <Link
                 href="/panel/kategori-alanlari"
-                className={
-                  navigationLinkClassName
-                }
+                className={navigationLinkClassName}
               >
                 Kategori Alanları
               </Link>
             ) : null}
 
+            {canManageSiteSettings ? (
+              <Link
+                href="/panel/site-ayarlari"
+                className={navigationLinkClassName}
+              >
+                Site Ayarları
+              </Link>
+            ) : null}
+
             <Link
               href="/panel/hesabim"
-              className={
-                navigationLinkClassName
-              }
+              className={navigationLinkClassName}
             >
               Hesabım
             </Link>
@@ -140,9 +141,7 @@ export default async function PanelLayout({
             {canManageUsers ? (
               <Link
                 href="/panel/kullanicilar"
-                className={
-                  navigationLinkClassName
-                }
+                className={navigationLinkClassName}
               >
                 Kullanıcılar
               </Link>
@@ -151,9 +150,7 @@ export default async function PanelLayout({
             {canViewSystemLogs ? (
               <Link
                 href="/panel/sistem-hareketleri"
-                className={
-                  navigationLinkClassName
-                }
+                className={navigationLinkClassName}
               >
                 Sistem Hareketleri
               </Link>

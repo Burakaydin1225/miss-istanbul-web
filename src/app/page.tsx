@@ -86,11 +86,15 @@ function isProductVisible(
 
 
 /*
- * Değerler aynı gün boyunca sabit kalır,
- * ertesi gün otomatik olarak yenilenir.
+ * İstatistikler gerçek veriye bağlı değilse bile
+ * kendi içinde tutarlı görünmelidir.
+ *
+ * - Son 24 saat: aktif ilanların düşük ve gerçekçi günlük tahmini toplamından üretilir.
+ * - Son 7 gün: haftalık seed ile haftada bir değişir.
+ * - Aktif ziyaretçi: 15 dakikalık periyotlarla değişir.
  */
-function createDailySeed(date: Date): number {
-  const dateKey = new Intl.DateTimeFormat(
+function createIstanbulDateKey(date: Date): string {
+  return new Intl.DateTimeFormat(
     "en-CA",
     {
       year: "numeric",
@@ -99,13 +103,114 @@ function createDailySeed(date: Date): number {
       timeZone: "Europe/Istanbul",
     },
   ).format(date);
+}
 
-  return Array.from(dateKey).reduce(
-    (seed, character) =>
-      (seed * 31 +
-        character.charCodeAt(0)) >>>
-      0,
+function createIstanbulWeekKey(date: Date): string {
+  const dateKey = createIstanbulDateKey(date);
+  const localDate = new Date(
+    `${dateKey}T00:00:00.000Z`,
+  );
+
+  const dayOfWeek =
+    localDate.getUTCDay() || 7;
+
+  localDate.setUTCDate(
+    localDate.getUTCDate() -
+      dayOfWeek +
+      1,
+  );
+
+  return new Intl.DateTimeFormat(
+    "en-CA",
+    {
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit",
+      timeZone: "UTC",
+    },
+  ).format(localDate);
+}
+
+function createIstanbulIntervalKey(
+  date: Date,
+  intervalMinutes: number,
+): string {
+  const parts = new Intl.DateTimeFormat(
+    "en-CA",
+    {
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit",
+      hour: "2-digit",
+      minute: "2-digit",
+      hour12: false,
+      timeZone: "Europe/Istanbul",
+    },
+  ).formatToParts(date);
+
+  const valueByType = new Map(
+    parts.map((part) => [
+      part.type,
+      part.value,
+    ]),
+  );
+
+  const year =
+    valueByType.get("year") ?? "0000";
+  const month =
+    valueByType.get("month") ?? "00";
+  const day =
+    valueByType.get("day") ?? "00";
+  const hour =
+    valueByType.get("hour") ?? "00";
+  const minute = Number(
+    valueByType.get("minute") ?? "0",
+  );
+
+  const interval = Math.floor(
+    minute / intervalMinutes,
+  );
+
+  return `${year}-${month}-${day}-${hour}-${interval}`;
+}
+
+function createSeedFromText(
+  value: string,
+): number {
+  return Array.from(value).reduce(
+    (seed, character) => {
+      seed ^= character.charCodeAt(0);
+
+      return Math.imul(
+        seed,
+        16777619,
+      ) >>> 0;
+    },
     2166136261,
+  );
+}
+
+function createDailySeed(date: Date): number {
+  return createSeedFromText(
+    createIstanbulDateKey(date),
+  );
+}
+
+function createWeeklySeed(date: Date): number {
+  return createSeedFromText(
+    createIstanbulWeekKey(date),
+  );
+}
+
+function createIntervalSeed(
+  date: Date,
+  intervalMinutes: number,
+): number {
+  return createSeedFromText(
+    createIstanbulIntervalKey(
+      date,
+      intervalMinutes,
+    ),
   );
 }
 
@@ -132,6 +237,118 @@ function createSeededNumber(
   );
 }
 
+function getListingDailyViewRange(
+  categoryValue: string,
+  sortOrder: number,
+): {
+  minimum: number;
+  maximum: number;
+} {
+  const position = Math.max(
+    1,
+    sortOrder,
+  );
+
+  if (categoryValue === "VIP") {
+    const maximum = Math.max(
+      320,
+      900 - (position - 1) * 18,
+    );
+
+    const minimum = Math.max(
+      220,
+      maximum - 260,
+    );
+
+    return {
+      minimum,
+      maximum,
+    };
+  }
+
+  if (categoryValue === "PREMIUM") {
+    const maximum = Math.max(
+      180,
+      560 - (position - 1) * 12,
+    );
+
+    const minimum = Math.max(
+      130,
+      maximum - 180,
+    );
+
+    return {
+      minimum,
+      maximum,
+    };
+  }
+
+  const maximum = Math.max(
+    90,
+    260 - (position - 1) * 7,
+  );
+
+  const minimum = Math.max(
+    60,
+    maximum - 90,
+  );
+
+  return {
+    minimum,
+    maximum,
+  };
+}
+
+function createListingDailyViewCount(
+  date: Date,
+  product: {
+    id: string;
+    category: string;
+    sortOrder: number;
+  },
+): number {
+  const seed = createSeedFromText(
+    `${createIstanbulDateKey(date)}:${product.id}:${product.category}:${product.sortOrder}`,
+  );
+
+  const range = getListingDailyViewRange(
+    product.category,
+    product.sortOrder,
+  );
+
+  return createSeededNumber(
+    seed,
+    1,
+    range.minimum,
+    range.maximum,
+  );
+}
+
+function createListingWeeklyViewCount(
+  date: Date,
+  product: {
+    id: string;
+    category: string;
+    sortOrder: number;
+  },
+): number {
+  const seed = createSeedFromText(
+    `${createIstanbulWeekKey(date)}:${product.id}:${product.category}:${product.sortOrder}:week`,
+  );
+
+  const range = getListingDailyViewRange(
+    product.category,
+    product.sortOrder,
+  );
+
+  return createSeededNumber(
+    seed,
+    2,
+    Math.round(range.minimum * 3.8),
+    Math.round(range.maximum * 6.2),
+  );
+}
+
 
 function getCategoryNeonTheme(
   categoryValue: string,
@@ -149,20 +366,22 @@ function getCategoryNeonTheme(
           "0 0 0 1px rgba(217,70,239,0.32), 0 0 34px rgba(217,70,239,0.5)",
         divider:
           "rgba(217,70,239,0.55)",
+        icon: "👑",
       };
 
     case "PREMIUM":
       return {
-        accent: "#ff7a00",
-        titleColor: "#ffc184",
+        accent: "#00d9ff",
+        titleColor: "#a7f3ff",
         titleBackground:
-          "linear-gradient(90deg, #050505 0%, #311403 55%, #050505 100%)",
+          "linear-gradient(90deg, #050505 0%, #032636 55%, #050505 100%)",
         glow:
-          "0 0 0 1px rgba(255,122,0,0.22), 0 0 22px rgba(255,122,0,0.3)",
+          "0 0 0 1px rgba(0,217,255,0.22), 0 0 22px rgba(0,217,255,0.3)",
         hoverGlow:
-          "0 0 0 1px rgba(255,122,0,0.32), 0 0 34px rgba(255,122,0,0.48)",
+          "0 0 0 1px rgba(0,217,255,0.32), 0 0 34px rgba(0,217,255,0.48)",
         divider:
-          "rgba(255,122,0,0.55)",
+          "rgba(0,217,255,0.55)",
+        icon: "💎",
       };
 
     default:
@@ -177,6 +396,7 @@ function getCategoryNeonTheme(
           "0 0 0 1px rgba(255,214,0,0.32), 0 0 34px rgba(255,214,0,0.48)",
         divider:
           "rgba(255,214,0,0.55)",
+        icon: "⚜️",
       };
   }
 }
@@ -426,29 +646,118 @@ export default async function HomePage() {
 
 
   const dailySeed = createDailySeed(now);
+  const weeklySeed = createWeeklySeed(now);
+
+  /*
+   * Aktif ziyaretçi 15 dakikada bir değişir.
+   * 30 dakikada bir değişmesini istersen
+   * buradaki 15 değerini 30 yap.
+   */
+  const activeSeed = createIntervalSeed(
+    now,
+    15,
+  );
+
+  const listingViewsLast24 =
+    visibleProducts.reduce(
+      (total, product) =>
+        total +
+        createListingDailyViewCount(
+          now,
+          product,
+        ),
+      0,
+    );
+
+  const listingViewsLast7Days =
+    visibleProducts.reduce(
+      (total, product) =>
+        total +
+        createListingWeeklyViewCount(
+          now,
+          product,
+        ),
+      0,
+    );
+
+  const last24ExtraViews =
+    listingViewsLast24 > 0
+      ? createSeededNumber(
+          dailySeed,
+          4,
+          Math.max(
+            80,
+            Math.round(
+              listingViewsLast24 * 0.04,
+            ),
+          ),
+          Math.max(
+            180,
+            Math.round(
+              listingViewsLast24 * 0.09,
+            ),
+          ),
+        )
+      : 0;
+
+  const last7ExtraViews =
+    listingViewsLast7Days > 0
+      ? createSeededNumber(
+          weeklySeed,
+          5,
+          Math.max(
+            350,
+            Math.round(
+              listingViewsLast7Days * 0.035,
+            ),
+          ),
+          Math.max(
+            900,
+            Math.round(
+              listingViewsLast7Days * 0.08,
+            ),
+          ),
+        )
+      : 0;
 
   const last24HoursViews =
-    createSeededNumber(
-      dailySeed,
-      1,
-      900,
-      3000,
-    );
+    listingViewsLast24 > 0
+      ? listingViewsLast24 +
+        last24ExtraViews
+      : createSeededNumber(
+          dailySeed,
+          1,
+          450,
+          1200,
+        );
 
   const last7DaysViews =
-    createSeededNumber(
-      dailySeed,
-      2,
-      40000,
-      120000,
-    );
+    listingViewsLast7Days > 0
+      ? listingViewsLast7Days +
+        last7ExtraViews
+      : createSeededNumber(
+          weeklySeed,
+          2,
+          2500,
+          9500,
+        );
 
   const activeVisitorCount =
     createSeededNumber(
-      dailySeed,
+      activeSeed,
       3,
-      90,
-      500,
+      Math.max(
+        6,
+        Math.round(
+          last24HoursViews / 1800,
+        ),
+      ),
+      Math.max(
+        18,
+        Math.round(
+          last24HoursViews / 650,
+        ),
+      ),
     );
 
 
@@ -639,6 +948,13 @@ export default async function HomePage() {
                               }88`,
                             }}
                           >
+                            <span className="mr-2 align-middle drop-shadow-[0_0_10px_rgba(255,255,255,0.55)]">
+                              {
+                                getCategoryNeonTheme(
+                                  category.value,
+                                ).icon
+                              }
+                            </span>
                             {category.label}
                           </h2>
 
@@ -818,7 +1134,7 @@ export default async function HomePage() {
                             }}
                           >
                             <div
-                              className="relative overflow-hidden border-b px-4 py-2.5"
+                              className="relative overflow-hidden border-b px-4 py-2.5 pr-28"
                               style={{
                                 background:
                                   neonTheme.titleBackground,
@@ -836,6 +1152,21 @@ export default async function HomePage() {
                               >
                                 {product.name}
                               </h3>
+
+                              {product.cardTag ? (
+                                <span
+                                  className="absolute right-2 top-1/2 max-w-[104px] -translate-y-1/2 truncate rounded-full border px-2.5 py-1 text-[9px] font-black uppercase tracking-[0.08em] text-white shadow-lg"
+                                  style={{
+                                    borderColor:
+                                      `${neonTheme.accent}99`,
+                                    background: `linear-gradient(135deg, ${neonTheme.accent}, rgba(0,0,0,0.92))`,
+                                    boxShadow: `0 0 14px ${neonTheme.accent}80`,
+                                  }}
+                                  title={product.cardTag}
+                                >
+                                  {product.cardTag}
+                                </span>
+                              ) : null}
                             </div>
 
                             <div className="grid grid-cols-3 overflow-hidden">

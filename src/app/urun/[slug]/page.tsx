@@ -114,40 +114,40 @@ function createDailyListingViewCount(
   const position =
     Math.max(1, sortOrder);
 
-  let minimum = 900;
-  let maximum = 1200;
+  let minimum = 60;
+  let maximum = 260;
 
   if (categoryValue === "VIP") {
     maximum = Math.max(
-      2500,
-      4000 - (position - 1) * 28,
+      320,
+      900 - (position - 1) * 18,
     );
 
     minimum = Math.max(
-      2200,
-      maximum - 550,
+      220,
+      maximum - 260,
     );
   } else if (
     categoryValue === "PREMIUM"
   ) {
     maximum = Math.max(
-      1550,
-      3100 - (position - 1) * 22,
+      180,
+      560 - (position - 1) * 12,
     );
 
     minimum = Math.max(
-      1300,
-      maximum - 450,
+      130,
+      maximum - 180,
     );
   } else {
     maximum = Math.max(
-      1000,
-      1650 - (position - 1) * 14,
+      90,
+      260 - (position - 1) * 7,
     );
 
     minimum = Math.max(
-      900,
-      maximum - 260,
+      60,
+      maximum - 90,
     );
   }
 
@@ -182,6 +182,20 @@ function normalizeWhatsappNumber(
   }
 
   return digits;
+}
+
+function createWhatsappUrl(
+  phoneNumber: string | null | undefined,
+  encodedMessage: string,
+): string {
+  const normalizedNumber =
+    normalizeWhatsappNumber(phoneNumber);
+
+  if (!normalizedNumber) {
+    return `https://wa.me/?text=${encodedMessage}`;
+  }
+
+  return `https://wa.me/${normalizedNumber}?text=${encodedMessage}`;
 }
 
 function normalizeTableCell(
@@ -427,6 +441,21 @@ export default async function ProductPage({
             sortOrder: "asc",
           },
         },
+        whatsappButtons: {
+          where: {
+            isActive: true,
+          },
+          orderBy: {
+            sortOrder: "asc",
+          },
+          select: {
+            id: true,
+            label: true,
+            phoneNumber: true,
+            sortOrder: true,
+            isActive: true,
+          },
+        },
       },
     });
 
@@ -459,27 +488,39 @@ export default async function ProductPage({
       product.sortOrder,
     );
 
-  const productWhatsappNumber =
-    normalizeWhatsappNumber(
-      product.whatsappNumber,
-    );
-
-  const generalWhatsappNumber =
-    normalizeWhatsappNumber(
-      settings?.whatsappNumber,
-    );
-
-  const whatsappNumber =
-    productWhatsappNumber ||
-    generalWhatsappNumber;
-
   const whatsappMessage = encodeURIComponent(
     `${product.name} ilanını Miss İstanbul sitesinden gördüm, bilgi almak istiyorum.`,
   );
 
-  const whatsappUrl = whatsappNumber
-    ? `https://wa.me/${whatsappNumber}?text=${whatsappMessage}`
-    : `https://wa.me/?text=${whatsappMessage}`;
+  const productWhatsappButtons =
+    product.whatsappButtons.map((button) => ({
+      id: button.id,
+      label:
+        button.label.trim() ||
+        "WhatsApp ile bilgi al",
+      href: createWhatsappUrl(
+        button.phoneNumber,
+        whatsappMessage,
+      ),
+    }));
+
+  const fallbackWhatsappNumber =
+    product.whatsappNumber ||
+    settings?.whatsappNumber;
+
+  const whatsappButtons =
+    productWhatsappButtons.length > 0
+      ? productWhatsappButtons
+      : [
+          {
+            id: "fallback",
+            label: "WhatsApp ile bilgi al",
+            href: createWhatsappUrl(
+              fallbackWhatsappNumber,
+              whatsappMessage,
+            ),
+          },
+        ];
 
   const categoryInformation =
     getProductCategoryConfig(
@@ -830,22 +871,29 @@ export default async function ProductPage({
                   </div>
                 </div>
 
-                <WhatsappButton
-                  href={whatsappUrl}
-                  productId={product.id}
-                  productName={product.name}
-                  className="mt-7 hidden min-h-14 w-full items-center justify-center gap-3 rounded-2xl bg-[#1fa855] px-5 text-sm font-black text-white shadow-[0_14px_30px_rgba(31,168,85,0.24)] transition hover:-translate-y-0.5 hover:bg-[#198f49] active:scale-[0.98] lg:flex"
-                >
-                  <svg
-                    viewBox="0 0 24 24"
-                    aria-hidden="true"
-                    className="size-5 fill-current"
-                  >
-                    <path d="M12.04 2a9.84 9.84 0 0 0-8.45 14.88L2 22l5.25-1.55A9.98 9.98 0 1 0 12.04 2Zm0 17.96a8.1 8.1 0 0 1-4.13-1.13l-.3-.18-3.11.92.93-3.03-.2-.31a8.03 8.03 0 1 1 6.81 3.73Zm4.43-6.02c-.24-.12-1.44-.71-1.66-.79-.23-.08-.39-.12-.56.12-.16.24-.63.79-.77.95-.14.16-.28.18-.52.06-.24-.12-1.02-.38-1.94-1.2a7.27 7.27 0 0 1-1.34-1.67c-.14-.24-.02-.37.1-.49.11-.11.24-.28.36-.42.12-.14.16-.24.24-.4.08-.16.04-.3-.02-.42-.06-.12-.55-1.33-.76-1.82-.2-.48-.4-.41-.56-.42h-.47c-.16 0-.42.06-.64.3-.22.24-.84.82-.84 2 0 1.18.86 2.32.98 2.48.12.16 1.69 2.58 4.1 3.62.57.25 1.02.4 1.37.51.58.18 1.1.16 1.51.1.46-.07 1.44-.59 1.64-1.16.2-.57.2-1.06.14-1.16-.06-.1-.22-.16-.46-.28Z" />
-                  </svg>
+                <div className="mt-7 hidden space-y-3 lg:block">
+                  {whatsappButtons.map(
+                    (button) => (
+                      <WhatsappButton
+                        key={button.id}
+                        href={button.href}
+                        productId={product.id}
+                        productName={product.name}
+                        className="flex min-h-14 w-full items-center justify-center gap-3 rounded-2xl bg-[#1fa855] px-5 text-sm font-black text-white shadow-[0_14px_30px_rgba(31,168,85,0.24)] transition hover:-translate-y-0.5 hover:bg-[#198f49] active:scale-[0.98]"
+                      >
+                        <svg
+                          viewBox="0 0 24 24"
+                          aria-hidden="true"
+                          className="size-5 fill-current"
+                        >
+                          <path d="M12.04 2a9.84 9.84 0 0 0-8.45 14.88L2 22l5.25-1.55A9.98 9.98 0 1 0 12.04 2Zm0 17.96a8.1 8.1 0 0 1-4.13-1.13l-.3-.18-3.11.92.93-3.03-.2-.31a8.03 8.03 0 1 1 6.81 3.73Zm4.43-6.02c-.24-.12-1.44-.71-1.66-.79-.23-.08-.39-.12-.56.12-.16.24-.63.79-.77.95-.14.16-.28.18-.52.06-.24-.12-1.02-.38-1.94-1.2a7.27 7.27 0 0 1-1.34-1.67c-.14-.24-.02-.37.1-.49.11-.11.24-.28.36-.42.12-.14.16-.24.24-.4.08-.16.04-.3-.02-.42-.06-.12-.55-1.33-.76-1.82-.2-.48-.4-.41-.56-.42h-.47c-.16 0-.42.06-.64.3-.22.24-.84.82-.84 2 0 1.18.86 2.32.98 2.48.12.16 1.69 2.58 4.1 3.62.57.25 1.02.4 1.37.51.58.18 1.1.16 1.51.1.46-.07 1.44-.59 1.64-1.16.2-.57.2-1.06.14-1.16-.06-.1-.22-.16-.46-.28Z" />
+                        </svg>
 
-                  WhatsApp ile bilgi al
-                </WhatsappButton>
+                        {button.label}
+                      </WhatsappButton>
+                    ),
+                  )}
+                </div>
 
                 <p className="mt-3 hidden text-center text-xs leading-5 text-neutral-400 lg:block">
                   Hazır mesajla ilan sahibine
@@ -858,22 +906,29 @@ export default async function ProductPage({
       </main>
 
       <div className="fixed inset-x-0 bottom-0 z-40 border-t border-black/10 bg-white/92 p-3 shadow-[0_-12px_35px_rgba(0,0,0,0.08)] backdrop-blur-xl lg:hidden">
-        <WhatsappButton
-          href={whatsappUrl}
-          productId={product.id}
-          productName={product.name}
-          className="mx-auto flex min-h-14 max-w-xl items-center justify-center gap-3 rounded-2xl bg-[#1fa855] px-5 text-sm font-black text-white shadow-[0_12px_28px_rgba(31,168,85,0.24)] transition active:scale-[0.98]"
-        >
-          <svg
-            viewBox="0 0 24 24"
-            aria-hidden="true"
-            className="size-5 fill-current"
-          >
-            <path d="M12.04 2a9.84 9.84 0 0 0-8.45 14.88L2 22l5.25-1.55A9.98 9.98 0 1 0 12.04 2Zm0 17.96a8.1 8.1 0 0 1-4.13-1.13l-.3-.18-3.11.92.93-3.03-.2-.31a8.03 8.03 0 1 1 6.81 3.73Zm4.43-6.02c-.24-.12-1.44-.71-1.66-.79-.23-.08-.39-.12-.56.12-.16.24-.63.79-.77.95-.14.16-.28.18-.52.06-.24-.12-1.02-.38-1.94-1.2a7.27 7.27 0 0 1-1.34-1.67c-.14-.24-.02-.37.1-.49.11-.11.24-.28.36-.42.12-.14.16-.24.24-.4.08-.16.04-.3-.02-.42-.06-.12-.55-1.33-.76-1.82-.2-.48-.4-.41-.56-.42h-.47c-.16 0-.42.06-.64.3-.22.24-.84.82-.84 2 0 1.18.86 2.32.98 2.48.12.16 1.69 2.58 4.1 3.62.57.25 1.02.4 1.37.51.58.18 1.1.16 1.51.1.46-.07 1.44-.59 1.64-1.16.2-.57.2-1.06.14-1.16-.06-.1-.22-.16-.46-.28Z" />
-          </svg>
+        <div className="mx-auto max-h-[42vh] max-w-xl space-y-2 overflow-y-auto">
+          {whatsappButtons.map(
+            (button) => (
+              <WhatsappButton
+                key={`mobile-${button.id}`}
+                href={button.href}
+                productId={product.id}
+                productName={product.name}
+                className="flex min-h-13 w-full items-center justify-center gap-3 rounded-2xl bg-[#1fa855] px-5 text-sm font-black text-white shadow-[0_12px_28px_rgba(31,168,85,0.24)] transition active:scale-[0.98]"
+              >
+                <svg
+                  viewBox="0 0 24 24"
+                  aria-hidden="true"
+                  className="size-5 fill-current"
+                >
+                  <path d="M12.04 2a9.84 9.84 0 0 0-8.45 14.88L2 22l5.25-1.55A9.98 9.98 0 1 0 12.04 2Zm0 17.96a8.1 8.1 0 0 1-4.13-1.13l-.3-.18-3.11.92.93-3.03-.2-.31a8.03 8.03 0 1 1 6.81 3.73Zm4.43-6.02c-.24-.12-1.44-.71-1.66-.79-.23-.08-.39-.12-.56.12-.16.24-.63.79-.77.95-.14.16-.28.18-.52.06-.24-.12-1.02-.38-1.94-1.2a7.27 7.27 0 0 1-1.34-1.67c-.14-.24-.02-.37.1-.49.11-.11.24-.28.36-.42.12-.14.16-.24.24-.4.08-.16.04-.3-.02-.42-.06-.12-.55-1.33-.76-1.82-.2-.48-.4-.41-.56-.42h-.47c-.16 0-.42.06-.64.3-.22.24-.84.82-.84 2 0 1.18.86 2.32.98 2.48.12.16 1.69 2.58 4.1 3.62.57.25 1.02.4 1.37.51.58.18 1.1.16 1.51.1.46-.07 1.44-.59 1.64-1.16.2-.57.2-1.06.14-1.16-.06-.1-.22-.16-.46-.28Z" />
+                </svg>
 
-          WhatsApp ile bilgi al
-        </WhatsappButton>
+                {button.label}
+              </WhatsappButton>
+            ),
+          )}
+        </div>
       </div>
     </div>
 
