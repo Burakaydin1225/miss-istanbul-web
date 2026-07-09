@@ -928,17 +928,17 @@ export function ProductForm({
               id="cardTag"
               name="cardTag"
               type="text"
-              maxLength={28}
+              maxLength={40}
               defaultValue={
                 product?.cardTag ?? ""
               }
               className={inputClassName}
-              placeholder="Örn. İstanbul, Kadıköy, Avrupa Yakası"
+              placeholder="Örn. İstanbul Avrupa Yakası"
             />
 
             <p className="mt-2 text-xs leading-5 text-neutral-500">
               Anasayfadaki ürün kartının sağ üstünde
-              parlak etiket olarak görünür. Boş
+              daha geniş parlak etiket olarak görünür. Boş
               bırakırsanız etiket gösterilmez.
             </p>
           </div>

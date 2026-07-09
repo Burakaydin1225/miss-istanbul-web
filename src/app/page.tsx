@@ -795,18 +795,18 @@ export default async function HomePage() {
         }}
       />
       <header className="border-b border-fuchsia-400/40 bg-black shadow-[0_0_26px_rgba(217,70,239,0.28)]">
-        <div className="mx-auto flex h-20 max-w-5xl items-center justify-center px-3 sm:h-24 sm:px-4">
+        <div className="mx-auto flex h-16 max-w-7xl items-center justify-center px-3 sm:h-20 sm:px-4">
           <Link
             href="/"
             aria-label={`${companyName} ana sayfa`}
-            className="animate-pulse whitespace-nowrap bg-[linear-gradient(90deg,#ffd6ff_0%,#ff7df4_34%,#c084fc_68%,#67e8f9_100%)] bg-clip-text px-4 text-center text-[clamp(1.7rem,6vw,3.4rem)] font-black tracking-[0.12em] text-transparent drop-shadow-[0_0_12px_rgba(232,121,249,0.95)]"
+            className="animate-pulse whitespace-nowrap bg-[linear-gradient(90deg,#ffd6ff_0%,#ff7df4_34%,#c084fc_68%,#67e8f9_100%)] bg-clip-text px-4 text-center text-[clamp(1.45rem,5vw,3.15rem)] font-black tracking-[0.12em] text-transparent drop-shadow-[0_0_12px_rgba(232,121,249,0.95)]"
           >
             {companyName}
           </Link>
         </div>
       </header>
 
-      <main className="mx-auto max-w-5xl px-3 pb-14 pt-5 sm:px-4 sm:pt-7">
+      <main className="mx-auto max-w-7xl px-2.5 pb-12 pt-4 sm:px-4 sm:pt-6 xl:max-w-[1500px]">
         <section className="sr-only">
           <h1>
             Escort İlanları
@@ -821,7 +821,7 @@ export default async function HomePage() {
 
         <section
           aria-label="Site istatistikleri"
-          className="mx-auto mb-5 max-w-3xl overflow-hidden rounded-[18px] border-2 border-fuchsia-400 bg-neutral-950 px-2 py-2 sm:px-3 sm:py-3"
+          className="mx-auto mb-4 max-w-3xl overflow-hidden rounded-[18px] border-2 border-fuchsia-400 bg-neutral-950 px-2 py-1.5 sm:px-3 sm:py-2.5"
           style={{
             boxShadow:
               "0 0 0 1px rgba(217,70,239,0.18), 0 0 18px rgba(217,70,239,0.3)",
@@ -885,7 +885,7 @@ export default async function HomePage() {
         </section>
 
         {groupedCategories.length > 0 ? (
-          <div className="space-y-10">
+          <div className="space-y-7 sm:space-y-9">
             {groupedCategories.map(
               (category) => (
                 <section
@@ -894,7 +894,7 @@ export default async function HomePage() {
                   className="scroll-mt-24"
                 >
                   <div
-                    className="mb-4 flex items-center gap-4 overflow-hidden rounded-[20px] border px-4 py-3 sm:px-5 sm:py-4"
+                    className="mb-3 flex items-center gap-3 overflow-hidden rounded-[18px] border px-3 py-2.5 sm:px-5 sm:py-3.5"
                     style={{
                       borderColor:
                         getCategoryNeonTheme(
@@ -914,7 +914,7 @@ export default async function HomePage() {
                   >
                     <div className="flex min-w-0 items-center gap-3">
                       <span
-                        className="h-11 w-1.5 shrink-0 rounded-full"
+                        className="h-9 w-1.5 shrink-0 rounded-full sm:h-11"
                         style={{
                           background:
                             getCategoryNeonTheme(
@@ -931,7 +931,7 @@ export default async function HomePage() {
                       <div className="min-w-0">
                         <div className="flex flex-wrap items-center gap-2">
                           <h2
-                            className="animate-pulse text-2xl font-black tracking-[-0.04em] sm:text-3xl"
+                            className="animate-pulse text-xl font-black tracking-[-0.04em] sm:text-3xl"
                             style={{
                               color:
                                 getCategoryNeonTheme(
@@ -964,7 +964,7 @@ export default async function HomePage() {
 
                   </div>
 
-                  <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
+                  <div className="grid grid-cols-1 gap-2.5 sm:grid-cols-2 lg:grid-cols-4 xl:gap-3">
                     {category.items.map(
                       (item) => {
                         const neonTheme =
@@ -1005,9 +1005,9 @@ export default async function HomePage() {
                                   advertisementTheme.glow,
                               }}
                             >
-                              <div className="flex h-full min-h-[146px] overflow-hidden rounded-[18px] bg-[linear-gradient(135deg,#ffffff_0%,#fff7ff_48%,#effcff_100%)] sm:min-h-[158px]">
+                              <div className="flex h-full min-h-[124px] overflow-hidden rounded-[16px] bg-[linear-gradient(135deg,#ffffff_0%,#fff7ff_48%,#effcff_100%)] sm:min-h-[140px] lg:min-h-[150px]">
                                 <div
-                                  className="relative flex w-[104px] shrink-0 items-center justify-center overflow-hidden sm:w-[124px]"
+                                  className="relative flex w-[88px] shrink-0 items-center justify-center overflow-hidden sm:w-[104px] lg:w-[112px]"
                                   style={{
                                     background:
                                       advertisementTheme.icon,
@@ -1029,7 +1029,7 @@ export default async function HomePage() {
                                   </span>
                                 </div>
 
-                                <div className="flex min-w-0 flex-1 items-center gap-2.5 px-3 py-3 sm:px-4">
+                                <div className="flex min-w-0 flex-1 items-center gap-2 px-2.5 py-2.5 sm:px-3 lg:px-4">
                                   <div className="min-w-0 flex-1">
                                     <span
                                       className="inline-flex rounded-full px-2.5 py-1 text-[9px] font-black uppercase tracking-[0.13em] text-white"
@@ -1043,12 +1043,12 @@ export default async function HomePage() {
                                       Reklam alanı
                                     </span>
 
-                                    <h3 className="mt-1.5 text-sm font-black tracking-[-0.01em] text-neutral-950 sm:text-[15px]">
+                                    <h3 className="mt-1 text-[13px] font-black tracking-[-0.01em] text-neutral-950 sm:text-sm lg:text-[15px]">
                                       Bu alana reklam
                                       verebilirsiniz
                                     </h3>
 
-                                    <p className="mt-1 line-clamp-2 text-[11px] leading-[17px] text-neutral-600 sm:text-xs">
+                                    <p className="mt-0.5 line-clamp-1 text-[11px] leading-[16px] text-neutral-600 sm:line-clamp-2 sm:text-xs">
                                       Tanıtım ve reklam
                                       bilgisi için
                                       WhatsApp üzerinden
@@ -1057,7 +1057,7 @@ export default async function HomePage() {
                                   </div>
 
                                   <span
-                                    className="flex size-8 shrink-0 items-center justify-center rounded-full text-sm font-black text-neutral-950 shadow-lg transition group-hover:translate-x-0.5"
+                                    className="flex size-7 shrink-0 items-center justify-center rounded-full text-xs font-black text-neutral-950 shadow-lg transition group-hover:translate-x-0.5 sm:size-8 sm:text-sm"
                                     style={{
                                       background:
                                         advertisementTheme.arrow,
@@ -1125,7 +1125,7 @@ export default async function HomePage() {
                             key={product.id}
                             href={`/urun/${product.slug}`}
                             aria-label={`${product.name} ilanını görüntüle`}
-                            className="group relative block overflow-hidden rounded-[18px] border-2 bg-neutral-950 transition duration-200 hover:-translate-y-0.5 active:scale-[0.99]"
+                            className="group relative block overflow-hidden rounded-[16px] border-2 bg-neutral-950 transition duration-200 hover:-translate-y-0.5 active:scale-[0.99] sm:rounded-[18px]"
                             style={{
                               borderColor:
                                 neonTheme.accent,
@@ -1134,7 +1134,7 @@ export default async function HomePage() {
                             }}
                           >
                             <div
-                              className="relative overflow-hidden border-b px-4 py-2.5 pr-28"
+                              className="relative overflow-hidden border-b px-3 py-1.5 pr-36 sm:px-4 sm:py-2 sm:pr-44 lg:py-2.5 lg:pr-36 xl:pr-40"
                               style={{
                                 background:
                                   neonTheme.titleBackground,
@@ -1143,7 +1143,7 @@ export default async function HomePage() {
                               }}
                             >
                               <h3
-                                className="relative line-clamp-1 text-sm font-black tracking-[0.01em] sm:text-[15px]"
+                                className="relative line-clamp-1 text-[13px] font-black tracking-[0.01em] sm:text-sm"
                                 style={{
                                   color:
                                     neonTheme.titleColor,
@@ -1155,7 +1155,7 @@ export default async function HomePage() {
 
                               {product.cardTag ? (
                                 <span
-                                  className="absolute right-2 top-1/2 max-w-[104px] -translate-y-1/2 truncate rounded-full border px-2.5 py-1 text-[9px] font-black uppercase tracking-[0.08em] text-white shadow-lg"
+                                  className="absolute right-1.5 top-1/2 max-w-[132px] -translate-y-1/2 truncate rounded-full border px-2.5 py-0.5 text-[9px] font-black uppercase tracking-[0.08em] text-white shadow-lg sm:right-2 sm:max-w-[170px] sm:px-3 sm:py-1 lg:max-w-[126px] xl:max-w-[148px]"
                                   style={{
                                     borderColor:
                                       `${neonTheme.accent}99`,
@@ -1177,7 +1177,7 @@ export default async function HomePage() {
                                 ) => (
                                   <div
                                     key={`${product.id}-card-image-${imageIndex}`}
-                                    className="relative aspect-[4/3] min-w-0 overflow-hidden bg-neutral-200"
+                                    className="relative aspect-[5/3] min-w-0 overflow-hidden bg-neutral-200 sm:aspect-[4/3] lg:aspect-square"
                                     style={
                                       imageIndex < 2
                                         ? {
@@ -1197,7 +1197,7 @@ export default async function HomePage() {
                                         imageIndex ===
                                           0
                                       }
-                                      sizes="(max-width: 768px) 33vw, 17vw"
+                                      sizes="(max-width: 640px) 33vw, (max-width: 1024px) 17vw, 9vw"
                                       className="object-cover saturate-[1.12] contrast-[1.04] transition duration-500 group-hover:scale-[1.045] group-hover:saturate-[1.22]"
                                     />
 
@@ -1231,7 +1231,7 @@ export default async function HomePage() {
       </main>
 
       <footer className="border-t border-black/[0.05] bg-white">
-        <div className="mx-auto max-w-5xl px-4 py-7">
+        <div className="mx-auto max-w-7xl px-4 py-6 xl:max-w-[1500px]">
           <nav
             aria-label="Alt menü"
             className="flex flex-wrap justify-center gap-x-5 gap-y-2"
