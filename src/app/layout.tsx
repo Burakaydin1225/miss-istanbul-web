@@ -1,14 +1,8 @@
-import type {
-  Metadata,
-  Viewport,
-} from "next";
+import type { Metadata, Viewport } from "next";
 
 import { AnalyticsTracker } from "@/components/AnalyticsTracker";
 import { GoogleAnalytics } from "@/components/GoogleAnalytics";
-import {
-  serializeJsonLd,
-  siteConfig,
-} from "@/lib/site-config";
+import { serializeJsonLd, siteConfig } from "@/lib/site-config";
 
 import "./globals.css";
 
@@ -25,7 +19,6 @@ export const metadata: Metadata = {
   },
 
   description: siteConfig.description,
-
   applicationName: siteConfig.name,
 
   authors: [
@@ -37,6 +30,7 @@ export const metadata: Metadata = {
 
   creator: siteConfig.name,
   publisher: siteConfig.name,
+  referrer: "strict-origin-when-cross-origin",
 
   formatDetection: {
     email: false,
@@ -66,7 +60,7 @@ export const metadata: Metadata = {
       index: true,
       follow: true,
       "max-image-preview": "large",
-      "max-snippet": -1,
+      "max-snippet": 160,
       "max-video-preview": -1,
     },
   },
@@ -93,16 +87,21 @@ export default function RootLayout({
   const websiteJsonLd = {
     "@context": "https://schema.org",
     "@type": "WebSite",
+    "@id": `${siteConfig.url}/#website`,
     name: siteConfig.name,
     alternateName: siteConfig.shortName,
     url: siteConfig.url,
     description: siteConfig.description,
     inLanguage: "tr-TR",
+    publisher: {
+      "@id": `${siteConfig.url}/#organization`,
+    },
   };
 
   const organizationJsonLd = {
     "@context": "https://schema.org",
     "@type": "Organization",
+    "@id": `${siteConfig.url}/#organization`,
     name: siteConfig.name,
     url: siteConfig.url,
   };
@@ -115,18 +114,14 @@ export default function RootLayout({
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{
-            __html: serializeJsonLd(
-              websiteJsonLd,
-            ),
+            __html: serializeJsonLd(websiteJsonLd),
           }}
         />
 
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{
-            __html: serializeJsonLd(
-              organizationJsonLd,
-            ),
+            __html: serializeJsonLd(organizationJsonLd),
           }}
         />
 

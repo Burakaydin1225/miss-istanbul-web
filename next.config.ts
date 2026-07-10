@@ -1,8 +1,8 @@
 import type { NextConfig } from "next";
 
-const remotePatterns: NonNullable<
-  NextConfig["images"]
->["remotePatterns"] = [
+const canonicalHost = "www.beylikduzu24.com";
+
+const remotePatterns: NonNullable<NextConfig["images"]>["remotePatterns"] = [
   {
     protocol: "https",
     hostname: "images.unsplash.com",
@@ -11,14 +11,11 @@ const remotePatterns: NonNullable<
   },
 ];
 
-const r2PublicUrl =
-  process.env.R2_PUBLIC_URL?.trim();
+const r2PublicUrl = process.env.R2_PUBLIC_URL?.trim();
 
 if (r2PublicUrl) {
   try {
-    const parsedR2Url = new URL(
-      r2PublicUrl,
-    );
+    const parsedR2Url = new URL(r2PublicUrl);
 
     remotePatterns.push({
       protocol: "https",
@@ -33,7 +30,17 @@ if (r2PublicUrl) {
   }
 }
 
+const noIndexHeaders = [
+  {
+    key: "X-Robots-Tag",
+    value: "noindex, nofollow, noarchive",
+  },
+];
+
 const nextConfig: NextConfig = {
+  poweredByHeader: false,
+  compress: true,
+
   images: {
     /**
      * Vercel Image Transformations limitinin dolmaması için
@@ -48,6 +55,39 @@ const nextConfig: NextConfig = {
      * Bu yüzden remotePatterns kalmalı.
      */
     remotePatterns,
+  },
+
+  async redirects() {
+    return [
+      {
+        source: "/:path*",
+        has: [
+          {
+            type: "host",
+            value: "beylikduzu24.com",
+          },
+        ],
+        destination: `https://${canonicalHost}/:path*`,
+        permanent: true,
+      },
+    ];
+  },
+
+  async headers() {
+    return [
+      {
+        source: "/panel/:path*",
+        headers: noIndexHeaders,
+      },
+      {
+        source: "/yonetici-giris",
+        headers: noIndexHeaders,
+      },
+      {
+        source: "/api/:path*",
+        headers: noIndexHeaders,
+      },
+    ];
   },
 };
 

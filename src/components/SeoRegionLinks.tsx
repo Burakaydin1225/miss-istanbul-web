@@ -2,14 +2,46 @@ import Link from "next/link";
 
 import { seoRegions } from "@/lib/site-config";
 
-export function SeoRegionLinks() {
+type SeoRegionLinksProps = {
+  regionSlugs?: readonly string[];
+};
+
+export function SeoRegionLinks({
+  regionSlugs,
+}: SeoRegionLinksProps) {
+  const displayedRegions = regionSlugs
+    ? seoRegions.filter((region) =>
+        regionSlugs.includes(region.slug),
+      )
+    : seoRegions;
+
+  if (displayedRegions.length === 0) {
+    return null;
+  }
+
   return (
     <section
-      aria-label="Popüler bölgeler"
-      className="mx-auto mb-4 max-w-5xl rounded-[18px] border border-black/10 bg-white/85 px-3 py-3 shadow-sm sm:px-4"
+      aria-labelledby="popular-regions-title"
+      className="mx-auto mb-5 max-w-5xl rounded-[18px] border border-black/10 bg-white/90 px-3 py-3.5 shadow-sm sm:px-5 sm:py-4"
     >
-      <div className="flex flex-wrap items-center justify-center gap-2">
-        {seoRegions.map((region) => (
+      <div className="text-center">
+        <h2
+          id="popular-regions-title"
+          className="text-sm font-black tracking-[-0.02em] text-neutral-950 sm:text-base"
+        >
+          İstanbul bölge ilanları
+        </h2>
+
+        <p className="mt-1 text-[11px] leading-5 text-neutral-500 sm:text-xs">
+          Aktif ilan bulunan bölgeleri inceleyin.
+        </p>
+      </div>
+
+      <nav
+        aria-label="İstanbul escort bölgeleri"
+        className="mt-3 flex flex-wrap items-center justify-center gap-2"
+      >
+        {displayedRegions.map((region) => (
           <Link
             key={region.slug}
             href={`/bolge/${region.slug}`}
@@ -18,7 +50,7 @@ export function SeoRegionLinks() {
             {region.name}
           </Link>
         ))}
-      </div>
+      </nav>
     </section>
   );
 }
