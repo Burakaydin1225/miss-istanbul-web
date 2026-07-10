@@ -6,6 +6,7 @@ import type {
 } from "react";
 
 import { trackAnalyticsEvent } from "@/lib/analytics-client";
+import { trackWhatsappClick } from "@/lib/analytics";
 
 type WhatsappButtonProps = Omit<
   ComponentPropsWithoutRef<"a">,
@@ -38,6 +39,10 @@ export function WhatsappButton({
             productName,
           }
         : undefined,
+    });
+
+    trackWhatsappClick({
+      productId,
     });
 
     onClick?.(event);

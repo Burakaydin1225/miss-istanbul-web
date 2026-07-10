@@ -4,6 +4,7 @@ import type {
 } from "next";
 
 import { AnalyticsTracker } from "@/components/AnalyticsTracker";
+import { GoogleAnalytics } from "@/components/GoogleAnalytics";
 import {
   serializeJsonLd,
   siteConfig,
@@ -12,7 +13,8 @@ import {
 import "./globals.css";
 
 const googleVerification =
-  process.env.GOOGLE_SITE_VERIFICATION?.trim();
+  process.env.GOOGLE_SITE_VERIFICATION?.trim() ||
+  process.env.NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION?.trim();
 
 export const metadata: Metadata = {
   metadataBase: new URL(siteConfig.url),
@@ -108,6 +110,8 @@ export default function RootLayout({
   return (
     <html lang="tr">
       <body>
+        <GoogleAnalytics />
+
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{
