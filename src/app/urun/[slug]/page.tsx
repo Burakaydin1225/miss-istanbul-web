@@ -9,6 +9,7 @@ import { getProductCategoryConfig } from "@/lib/product-categories";
 import prisma from "@/lib/prisma";
 import {
   absoluteUrl,
+  getSeoRegionBySlug,
   serializeJsonLd,
   siteConfig,
 } from "@/lib/site-config";
@@ -31,6 +32,8 @@ type ProductSeoRecord = {
   name: string;
   shortDescription: string | null;
   description: string | null;
+  cardTag?: string | null;
+  region?: string | null;
 };
 
 function cleanSeoText(value: string): string {
@@ -42,10 +45,21 @@ function cleanSeoText(value: string): string {
 function createProductSeoDescription(
   product: ProductSeoRecord,
 ): string {
+  const regionInformation = product.region
+    ? getSeoRegionBySlug(product.region)
+    : null;
+
+  const regionPrefix =
+    regionInformation?.shortName
+      ? `${regionInformation.shortName} bölgesinde `
+      : product.cardTag
+        ? `${product.cardTag} bölgesinde `
+        : "";
+
   const source =
     product.shortDescription ||
     product.description ||
-    `${product.name} ilanı hakkında güncel bilgi ve iletişim detayları.`;
+    `${regionPrefix}${product.name} ilanı hakkında güncel bilgi ve iletişim detayları.`;
 
   const cleanedSource =
     cleanSeoText(source);
@@ -270,6 +284,8 @@ export async function generateMetadata({
         coverImage: true,
         shortDescription: true,
         description: true,
+        cardTag: true,
+        region: true,
       },
     });
 
@@ -291,8 +307,17 @@ export async function generateMetadata({
   const description =
     createProductSeoDescription(product);
 
+  const productRegionInformation = product.region
+    ? getSeoRegionBySlug(product.region)
+    : null;
+
+  const regionTitlePart =
+    productRegionInformation?.shortName
+      ? `${productRegionInformation.shortName} `
+      : "";
+
   const title =
-    `${product.name} | ${categoryInformation.label} İlan | ${siteConfig.name}`;
+    `${product.name} | ${regionTitlePart}${categoryInformation.label} İlan | ${siteConfig.name}`;
 
   const url = absoluteUrl(
     `/urun/${product.slug}`,
@@ -527,6 +552,10 @@ export default async function ProductPage({
       product.category,
     );
 
+  const detailRegionInformation = product.region
+    ? getSeoRegionBySlug(product.region)
+    : null;
+
   const detailTheme =
     getDetailTheme(product.category);
 
@@ -566,8 +595,10 @@ export default async function ProductPage({
       url: siteConfig.url,
     },
     areaServed: {
-      "@type": "Country",
-      name: "Türkiye",
+      "@type": "City",
+      name:
+        detailRegionInformation?.shortName ||
+        "İstanbul",
     },
   };
 
@@ -706,6 +737,12 @@ export default async function ProductPage({
                     {categoryInformation.label}
                   </span>
 
+                  {detailRegionInformation ? (
+                    <span className="rounded-full border border-neutral-200 bg-neutral-50 px-3 py-1.5 text-[10px] font-black uppercase tracking-[0.12em] text-neutral-600">
+                      Bölge: {detailRegionInformation.shortName}
+                    </span>
+                  ) : null}
+
                   <span className="inline-flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-[0.12em] text-neutral-400">
                     <span
                       className="size-2 rounded-full"
@@ -722,6 +759,12 @@ export default async function ProductPage({
                 <h1 className="mt-5 text-[32px] font-black leading-[1.08] tracking-[-0.045em] text-neutral-950 sm:text-[40px]">
                   {product.name}
                 </h1>
+
+                {detailRegionInformation ? (
+                  <p className="mt-3 text-sm font-semibold text-neutral-500">
+                    Bu ilan {detailRegionInformation.shortName} bölgesinde listeleniyor.
+                  </p>
+                ) : null}
 
                 {product.shortDescription ? (
                   <div

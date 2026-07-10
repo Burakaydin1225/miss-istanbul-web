@@ -18,6 +18,7 @@ import {
   type OccupiedPositionsByCategory,
   type ProductCategoryValue,
 } from "@/lib/product-categories";
+import { productRegions } from "@/lib/product-regions";
 
 type ProductFormProduct = {
   id: string;
@@ -27,6 +28,7 @@ type ProductFormProduct = {
   detailTable?: unknown;
   coverImage: string;
   cardTag: string | null;
+  region: string | null;
   whatsappNumber: string | null;
   whatsappButtons?: {
     id: string;
@@ -940,6 +942,42 @@ export function ProductForm({
               Anasayfadaki ürün kartının sağ üstünde
               daha geniş parlak etiket olarak görünür. Boş
               bırakırsanız etiket gösterilmez.
+            </p>
+          </div>
+
+
+          <div>
+            <label
+              htmlFor="region"
+              className="text-sm font-medium text-neutral-700"
+            >
+              Bölge
+            </label>
+
+            <select
+              id="region"
+              name="region"
+              defaultValue={product?.region ?? ""}
+              className={inputClassName}
+            >
+              <option value="">
+                Bölge seçilmedi
+              </option>
+
+              {productRegions.map((region) => (
+                <option
+                  key={region.slug}
+                  value={region.slug}
+                >
+                  {region.shortName}
+                </option>
+              ))}
+            </select>
+
+            <p className="mt-2 text-xs leading-5 text-neutral-500">
+              Bu alan ana sayfadaki kartta gösterilmez.
+              Sadece ürün detayında ve bölge SEO
+              sayfalarında kullanılır.
             </p>
           </div>
 

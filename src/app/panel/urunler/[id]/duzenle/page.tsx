@@ -81,6 +81,7 @@ export default async function EditProductPage({
     detailTable: product.detailTable,
     coverImage: product.coverImage,
     cardTag: product.cardTag,
+    region: product.region,
     whatsappNumber:
       product.whatsappNumber,
     whatsappButtons:

@@ -1,3 +1,5 @@
+import { productRegions } from "./product-regions";
+
 function normalizeSiteUrl(value: string): string {
   const trimmedValue = value.trim();
 
@@ -32,10 +34,10 @@ export const siteConfig = {
   url: resolvedSiteUrl,
 
   homeTitle:
-    "Beylikdüzü Escort İlanları",
+    "Beylikdüzü Escort İlanları | Güncel VIP Premium Gold",
 
   description:
-    "İstanbul genelindeki escort ilanlarını inceleyin. İlan sahipleriyle doğrudan iletişime geçin. Beylikdüzü Escort, Avcılar Escort, Esenyurt Escort",
+    "Beylikdüzü escort ilanlarını VIP, Premium ve Gold kategorilerinde inceleyin. Avcılar, Esenyurt ve Büyükçekmece çevresindeki güncel ilanlara ulaşın.",
 
   contactEmail:
     process.env.NEXT_PUBLIC_CONTACT_EMAIL?.trim() ||
@@ -80,5 +82,21 @@ export function serializeJsonLd(
   return JSON.stringify(value).replace(
     /</g,
     "\\u003c",
+  );
+}
+
+
+export const seoRegions = productRegions;
+
+export type SeoRegion =
+  (typeof seoRegions)[number];
+
+export function getSeoRegionBySlug(
+  slug: string,
+): SeoRegion | null {
+  return (
+    seoRegions.find(
+      (region) => region.slug === slug,
+    ) ?? null
   );
 }

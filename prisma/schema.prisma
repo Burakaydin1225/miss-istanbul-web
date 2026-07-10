@@ -60,6 +60,7 @@ model Product {
   detailTable      Json?
   coverImage       String
   cardTag          String?
+  region           String?
 
   /*
    * Eski tekil WhatsApp alanı şimdilik korunuyor.
@@ -89,6 +90,7 @@ model Product {
 
   @@unique([category, sortOrder])
   @@index([category, isActive, sortOrder])
+  @@index([region, isActive, sortOrder])
   @@index([subscriptionEndsAt])
   @@index([createdAt])
 }

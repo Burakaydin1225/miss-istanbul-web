@@ -3,6 +3,7 @@ import type { MetadataRoute } from "next";
 import prisma from "@/lib/prisma";
 import {
   absoluteUrl,
+  seoRegions,
 } from "@/lib/site-config";
 
 export const dynamic = "force-dynamic";
@@ -79,6 +80,16 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     },
   ];
 
+  const regionRoutes =
+    seoRegions.map((region) => ({
+      url: absoluteUrl(
+        `/bolge/${region.slug}`,
+      ),
+      lastModified: now,
+      changeFrequency: "daily" as const,
+      priority: 0.75,
+    }));
+
   const productRoutes =
     products.map((product) => ({
       url: absoluteUrl(
@@ -91,6 +102,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
   return [
     ...staticRoutes,
+    ...regionRoutes,
     ...productRoutes,
   ];
 }

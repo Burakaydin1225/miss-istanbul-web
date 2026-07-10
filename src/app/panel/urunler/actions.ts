@@ -13,6 +13,10 @@ import { requireRole } from "@/lib/auth";
 import prisma from "@/lib/prisma";
 import { deleteR2FilesByUrls } from "@/lib/r2";
 import { writeAuditLog } from "@/lib/audit";
+import {
+  isProductRegionSlug,
+  productRegions,
+} from "@/lib/product-regions";
 
 export type ProductFormState = {
   error?: string;
@@ -39,6 +43,7 @@ type ProductFormValues = {
   detailTable: ProductDetailTable | null;
   coverImage: string;
   cardTag: string | null;
+  region: string | null;
   whatsappNumber: string | null;
   whatsappButtons: ProductWhatsappButtonInput[];
   category: ProductCategory;
@@ -546,6 +551,12 @@ function parseDetailTable(
   };
 }
 
+function isValidProductRegion(
+  value: string,
+): boolean {
+  return isProductRegionSlug(value);
+}
+
 function isProductCategory(
   value: string,
 ): value is ProductCategory {
@@ -688,6 +699,12 @@ function readProductForm(
     String(formData.get("cardTag") ?? "")
       .trim() || null;
 
+  const rawRegion = String(
+    formData.get("region") ?? "",
+  ).trim();
+
+  const region = rawRegion || null;
+
   const rawWhatsappNumber = String(
     formData.get("whatsappNumber") ?? "",
   ).trim();
@@ -822,6 +839,16 @@ function readProductForm(
   }
 
   if (
+    region &&
+    !isValidProductRegion(region)
+  ) {
+    return {
+      success: false,
+      error: "Geçerli bir bölge seçin.",
+    };
+  }
+
+  if (
     extraImages.some(
       (image) =>
         !isValidImageUrl(image),
@@ -886,6 +913,7 @@ function readProductForm(
         detailTableResult.value,
       coverImage,
       cardTag,
+      region,
       whatsappNumber,
       whatsappButtons,
       category: rawCategory,
@@ -973,6 +1001,10 @@ function refreshProductPages(
   revalidatePath("/panel");
   revalidatePath("/panel/urunler");
   revalidatePath("/panel/urunler/yeni");
+
+  for (const region of productRegions) {
+    revalidatePath(`/bolge/${region.slug}`);
+  }
 
   if (slug) {
     revalidatePath(`/urun/${slug}`);
@@ -1199,6 +1231,8 @@ export async function createProductAction(
                 values.coverImage,
               cardTag:
                 values.cardTag,
+              region:
+                values.region,
               whatsappNumber:
                 values.whatsappNumber,
               category:
@@ -1289,6 +1323,8 @@ export async function createProductAction(
             slug: product.slug,
             cardTag:
               product.cardTag,
+            region:
+              product.region,
             category:
               product.category,
             whatsappNumber:
@@ -1520,6 +1556,8 @@ export async function updateProductAction(
                 values.coverImage,
               cardTag:
                 values.cardTag,
+              region:
+                values.region,
               whatsappNumber:
                 values.whatsappNumber,
               category:
@@ -1589,6 +1627,8 @@ export async function updateProductAction(
                 existingProduct.shortDescription,
               cardTag:
                 existingProduct.cardTag,
+              region:
+                existingProduct.region,
               whatsappNumber:
                 existingProduct.whatsappNumber,
               whatsappButtonCount:
@@ -1615,6 +1655,8 @@ export async function updateProductAction(
                 updatedProduct.shortDescription,
               cardTag:
                 updatedProduct.cardTag,
+              region:
+                updatedProduct.region,
               whatsappNumber:
                 updatedProduct.whatsappNumber,
               whatsappButtonCount:
