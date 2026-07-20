@@ -20,37 +20,26 @@ export function SeoRegionLinks({
   }
 
   return (
-    <section
-      aria-labelledby="popular-regions-title"
-      className="mx-auto mb-5 max-w-5xl rounded-[18px] border border-black/10 bg-white/90 px-3 py-3.5 shadow-sm sm:px-5 sm:py-4"
+    <nav
+      aria-label="İstanbul bölge ilanları"
+      className="mt-2 flex min-w-0 items-center gap-1.5 overflow-x-auto pb-0.5 sm:mt-0 sm:shrink-0 sm:justify-end"
     >
-      <div className="text-center">
-        <h2
-          id="popular-regions-title"
-          className="text-sm font-black tracking-[-0.02em] text-neutral-950 sm:text-base"
-        >
-          İstanbul bölge ilanları
-        </h2>
-
-        <p className="mt-1 text-[11px] leading-5 text-neutral-500 sm:text-xs">
-          Aktif ilan bulunan bölgeleri inceleyin.
-        </p>
-      </div>
-
-      <nav
-        aria-label="İstanbul escort bölgeleri"
-        className="mt-3 flex flex-wrap items-center justify-center gap-2"
+      <span
+        aria-hidden="true"
+        className="shrink-0 text-[9px] font-black uppercase tracking-[0.11em] text-neutral-400"
       >
-        {displayedRegions.map((region) => (
-          <Link
-            key={region.slug}
-            href={`/bolge/${region.slug}`}
-            className="rounded-full border border-fuchsia-200 bg-fuchsia-50 px-3 py-1.5 text-[11px] font-bold text-fuchsia-700 transition hover:border-fuchsia-400 hover:bg-fuchsia-100"
-          >
-            {region.name}
-          </Link>
-        ))}
-      </nav>
-    </section>
+        Bölgeler
+      </span>
+
+      {displayedRegions.map((region) => (
+        <Link
+          key={region.slug}
+          href={`/bolge/${region.slug}`}
+          className="shrink-0 rounded-full border border-fuchsia-200 bg-fuchsia-50 px-2.5 py-1 text-[10px] font-bold leading-4 text-fuchsia-700 transition hover:border-fuchsia-400 hover:bg-fuchsia-100"
+        >
+          {region.shortName}
+        </Link>
+      ))}
+    </nav>
   );
 }

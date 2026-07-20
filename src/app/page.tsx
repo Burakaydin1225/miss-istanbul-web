@@ -803,24 +803,24 @@ export default async function HomePage() {
 
       <main className="mx-auto max-w-7xl px-2.5 pb-12 pt-4 sm:px-4 sm:pt-6 xl:max-w-[1500px]">
         <section
-          aria-labelledby="home-page-title"
-          className="mx-auto mb-5 max-w-5xl rounded-[18px] border border-black/[0.07] bg-white/90 px-4 py-4 text-center shadow-sm sm:mb-7 sm:px-6 sm:py-5"
-        >
-          <h1
-            id="home-page-title"
-            className="text-xl font-black tracking-[-0.035em] text-neutral-950 sm:text-2xl"
-          >
-            {siteConfig.homeHeading}
-          </h1>
+  aria-labelledby="home-page-title"
+  className="mb-4 rounded-[16px] border border-black/[0.07] bg-white/90 px-3 py-3 shadow-sm sm:mb-5 sm:flex sm:items-center sm:justify-between sm:gap-6 sm:px-4 sm:py-3.5"
+>
+  <div className="min-w-0 text-center sm:max-w-[520px] sm:text-left">
+    <h1
+      id="home-page-title"
+      className="text-lg font-black tracking-[-0.035em] text-neutral-950 sm:text-xl"
+    >
+      {siteConfig.homeHeading}
+    </h1>
 
-          <p className="mx-auto mt-2 max-w-3xl text-xs leading-5 text-neutral-600 sm:text-sm sm:leading-6">
-            {siteConfig.homeIntro}
-          </p>
+    <p className="mt-1 text-[11px] leading-5 text-neutral-500 sm:text-xs">
+      {siteConfig.homeIntro}
+    </p>
+  </div>
 
-          <div className="mt-4">
-            <SeoRegionLinks regionSlugs={activeRegionSlugs} />
-          </div>
-        </section>
+  <SeoRegionLinks regionSlugs={activeRegionSlugs} />
+</section>
 
         {groupedCategories.length > 0 ? (
           <div className="space-y-7 sm:space-y-9">
