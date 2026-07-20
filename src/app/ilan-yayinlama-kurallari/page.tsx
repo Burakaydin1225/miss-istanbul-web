@@ -5,7 +5,7 @@ import { siteConfig } from "@/lib/site-config";
 
 export const metadata: Metadata = {
   title: "İlan Yayınlama Kuralları",
-  description: `${siteConfig.name} üzerinde eskort araç ve ağır nakliye destek aracı ilanı yayınlama kurallarını inceleyin.`,
+  description: `${siteConfig.name} üzerindeki ilanların yayın, içerik, görsel ve iletişim kurallarını inceleyin.`,
   alternates: {
     canonical:
       "/ilan-yayinlama-kurallari",
@@ -20,9 +20,7 @@ export default function ListingRulesPage() {
       description="Platformdaki ilanların doğru, güvenilir ve anlaşılır olması için aşağıdaki temel kurallar uygulanır."
     >
       <ol className="list-decimal space-y-4 pl-5">
-        <li>
-          İlan yalnızca  hizmetiyle ilgili olmalıdır.
-        </li>
+        <li>İlan yalnızca platformun yayın kapsamıyla ilgili olmalıdır.</li>
 
         <li>
           Hizmet bilgileri gerçeğe uygun

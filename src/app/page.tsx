@@ -802,6 +802,26 @@ export default async function HomePage() {
       </header>
 
       <main className="mx-auto max-w-7xl px-2.5 pb-12 pt-4 sm:px-4 sm:pt-6 xl:max-w-[1500px]">
+        <section
+          aria-labelledby="home-page-title"
+          className="mx-auto mb-5 max-w-5xl rounded-[18px] border border-black/[0.07] bg-white/90 px-4 py-4 text-center shadow-sm sm:mb-7 sm:px-6 sm:py-5"
+        >
+          <h1
+            id="home-page-title"
+            className="text-xl font-black tracking-[-0.035em] text-neutral-950 sm:text-2xl"
+          >
+            {siteConfig.homeHeading}
+          </h1>
+
+          <p className="mx-auto mt-2 max-w-3xl text-xs leading-5 text-neutral-600 sm:text-sm sm:leading-6">
+            {siteConfig.homeIntro}
+          </p>
+
+          <div className="mt-4">
+            <SeoRegionLinks regionSlugs={activeRegionSlugs} />
+          </div>
+        </section>
+
         {groupedCategories.length > 0 ? (
           <div className="space-y-7 sm:space-y-9">
             {groupedCategories.map((category) => (
@@ -877,7 +897,7 @@ export default async function HomePage() {
                           key={`advertisement-${category.value}-${item.sortOrder}`}
                           href={advertisementHref}
                           target="_blank"
-                          rel="noopener noreferrer"
+                          rel="nofollow sponsored noopener noreferrer"
                           className="group block h-full rounded-[20px] p-[2px] transition duration-200 hover:-translate-y-0.5 active:scale-[0.99]"
                           style={{
                             background: advertisementTheme.frame,
@@ -1102,29 +1122,6 @@ export default async function HomePage() {
             </p>
           </div>
         )}
-
-        <aside
-          aria-label="Bölgesel ilan bağlantıları ve site açıklaması"
-          className="mt-10 border-t border-black/[0.06] pt-7 sm:mt-12 sm:pt-9"
-        >
-          <section
-            aria-labelledby="home-page-title"
-            className="mx-auto mb-4 max-w-5xl rounded-[18px] border border-black/[0.07] bg-white/90 px-4 py-4 text-center shadow-sm sm:px-6 sm:py-5"
-          >
-            <h1
-              id="home-page-title"
-              className="text-xl font-black tracking-[-0.035em] text-neutral-950 sm:text-2xl"
-            >
-              {siteConfig.homeHeading}
-            </h1>
-
-            <p className="mx-auto mt-2 max-w-3xl text-xs leading-5 text-neutral-600 sm:text-sm sm:leading-6">
-              {siteConfig.homeIntro}
-            </p>
-          </section>
-
-          <SeoRegionLinks regionSlugs={activeRegionSlugs} />
-        </aside>
 
       </main>
 

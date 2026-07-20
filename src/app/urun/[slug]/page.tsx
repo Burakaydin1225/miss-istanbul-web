@@ -515,6 +515,9 @@ export default async function ProductPage({ params }: ProductPageProps) {
     name: productSeoTitle,
     description: productSeoDescription,
     inLanguage: "tr-TR",
+    datePublished: product.createdAt.toISOString(),
+    dateModified: product.updatedAt.toISOString(),
+    isFamilyFriendly: false,
     isPartOf: {
       "@id": `${siteConfig.url}/#website`,
     },

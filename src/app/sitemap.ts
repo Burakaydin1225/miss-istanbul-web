@@ -1,5 +1,6 @@
 import type { MetadataRoute } from "next";
 
+import { productBelongsToRegion } from "@/lib/product-regions";
 import prisma from "@/lib/prisma";
 import { absoluteUrl, seoRegions } from "@/lib/site-config";
 
@@ -25,13 +26,19 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     select: {
       slug: true,
       createdAt: true,
+      updatedAt: true,
+      name: true,
+      shortDescription: true,
+      description: true,
+      cardTag: true,
+      region: true,
     },
     orderBy: {
-      createdAt: "desc",
+      updatedAt: "desc",
     },
   });
 
-  const latestListingDate = products[0]?.createdAt;
+  const latestListingDate = products[0]?.updatedAt;
 
   const staticRoutes: MetadataRoute.Sitemap = [
     {
@@ -67,17 +74,21 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     },
   ];
 
-  const regionRoutes: MetadataRoute.Sitemap = seoRegions.map((region) => ({
-    url: absoluteUrl(`/bolge/${region.slug}`),
-    lastModified: latestListingDate,
-    changeFrequency: "daily",
-    priority: 0.8,
-  }));
+  const regionRoutes: MetadataRoute.Sitemap = seoRegions
+    .filter((region) =>
+      products.some((product) => productBelongsToRegion(product, region)),
+    )
+    .map((region) => ({
+      url: absoluteUrl(`/bolge/${region.slug}`),
+      lastModified: latestListingDate,
+      changeFrequency: "daily",
+      priority: 0.8,
+    }));
 
   const productRoutes: MetadataRoute.Sitemap = products.map((product) => ({
     url: absoluteUrl(`/urun/${product.slug}`),
-    lastModified: product.createdAt,
-    changeFrequency: "daily",
+    lastModified: product.updatedAt,
+    changeFrequency: "weekly",
     priority: 0.7,
   }));
 
