@@ -83,7 +83,7 @@ export async function generateMetadata({
     createSeoDescription(
       product.shortDescription ||
         product.description,
-      `${product.name} Escort ilanının detaylarını ve görsellerini inceleyin.`,
+      `${product.name} escort ilanının detaylarını ve görsellerini inceleyin.`,
     );
 
   const canonicalPath =
@@ -95,10 +95,11 @@ export async function generateMetadata({
       (image) => image.imageUrl,
     ),
   ].filter(
+    (imageUrl): imageUrl is string =>
+      Boolean(imageUrl),
+  ).filter(
     (imageUrl, index, allImages) =>
-      Boolean(imageUrl) &&
-      allImages.indexOf(imageUrl) ===
-        index,
+      allImages.indexOf(imageUrl) === index,
   );
 
   return {
@@ -122,7 +123,7 @@ export async function generateMetadata({
         product.updatedAt.toISOString(),
       images: images.map((imageUrl) => ({
         url: imageUrl,
-        alt: `${product.name} eskort araç ilanı`,
+        alt: `${product.name} escort ilanı`,
       })),
     },
 
@@ -159,43 +160,9 @@ export default async function ProductSeoLayout({
     return children;
   }
 
-  const description =
-    createSeoDescription(
-      product.shortDescription ||
-        product.description,
-    );
-
   const canonicalUrl = absoluteUrl(
     `/urun/${product.slug}`,
   );
-
-  const imageUrls = [
-    product.coverImage,
-    ...product.images.map(
-      (image) => image.imageUrl,
-    ),
-  ].filter(
-    (imageUrl, index, allImages) =>
-      Boolean(imageUrl) &&
-      allImages.indexOf(imageUrl) ===
-        index,
-  );
-
-  const vehicleJsonLd = {
-    "@context": "https://schema.org",
-    "@type": "Vehicle",
-    name: product.name,
-    description,
-    url: canonicalUrl,
-    image: imageUrls,
-    datePosted:
-      product.createdAt.toISOString(),
-    dateModified:
-      product.updatedAt.toISOString(),
-    category:
-      "Ağır nakliye eskort aracı ilanı",
-    mainEntityOfPage: canonicalUrl,
-  };
 
   const breadcrumbJsonLd = {
     "@context": "https://schema.org",
@@ -218,15 +185,6 @@ export default async function ProductSeoLayout({
 
   return (
     <>
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{
-          __html: serializeJsonLd(
-            vehicleJsonLd,
-          ),
-        }}
-      />
-
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{
