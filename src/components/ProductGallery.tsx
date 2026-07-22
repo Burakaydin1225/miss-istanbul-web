@@ -200,6 +200,7 @@ export function ProductGallery({
                   src={image}
                   alt={`${productName} tam ekran küçük görsel ${index + 1}`}
                   fill
+                  loading="lazy"
                   sizes="64px"
                   className="object-cover"
                 />
@@ -266,6 +267,7 @@ export function ProductGallery({
                   src={image}
                   alt={`${productName} küçük görsel ${index + 1}`}
                   fill
+                  loading="lazy"
                   sizes="80px"
                   className="object-cover"
                 />

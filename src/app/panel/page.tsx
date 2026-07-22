@@ -39,28 +39,22 @@ const categoryInformation: Record<
 > = {
   [ProductCategory.VIP]: {
     label: "VIP",
-    badgeClassName:
-      "border-violet-200 bg-violet-50 text-violet-700",
+    badgeClassName: "border-violet-200 bg-violet-50 text-violet-700",
     barClassName: "bg-violet-600",
   },
   [ProductCategory.PREMIUM]: {
     label: "Premium",
-    badgeClassName:
-      "border-amber-200 bg-amber-50 text-amber-700",
+    badgeClassName: "border-amber-200 bg-amber-50 text-amber-700",
     barClassName: "bg-amber-500",
   },
   [ProductCategory.GOLD]: {
     label: "Gold",
-    badgeClassName:
-      "border-yellow-300 bg-yellow-50 text-yellow-700",
+    badgeClassName: "border-yellow-300 bg-yellow-50 text-yellow-700",
     barClassName: "bg-yellow-500",
   },
 };
 
-const paymentTypeLabels: Record<
-  SubscriptionPaymentType,
-  string
-> = {
+const paymentTypeLabels: Record<SubscriptionPaymentType, string> = {
   [SubscriptionPaymentType.INITIAL]: "İlk ödeme",
   [SubscriptionPaymentType.RENEWAL]: "Yenileme",
   [SubscriptionPaymentType.MANUAL]: "Manuel ödeme",
@@ -68,8 +62,7 @@ const paymentTypeLabels: Record<
 
 function getTimezoneOffsetMinutes(): number {
   const parsedValue = Number.parseInt(
-    process.env
-      .ANALYTICS_TIMEZONE_OFFSET_MINUTES ?? "180",
+    process.env.ANALYTICS_TIMEZONE_OFFSET_MINUTES ?? "180",
     10,
   );
 
@@ -81,14 +74,12 @@ function getTimezoneOffsetMinutes(): number {
 }
 
 function getLocalDateInformation() {
-  const timezoneOffsetMinutes =
-    getTimezoneOffsetMinutes();
+  const timezoneOffsetMinutes = getTimezoneOffsetMinutes();
 
   const now = new Date();
 
   const shiftedNow = new Date(
-    now.getTime() +
-      timezoneOffsetMinutes * MINUTE_IN_MS,
+    now.getTime() + timezoneOffsetMinutes * MINUTE_IN_MS,
   );
 
   const dateValue = new Date(
@@ -100,13 +91,10 @@ function getLocalDateInformation() {
   );
 
   const startAt = new Date(
-    dateValue.getTime() -
-      timezoneOffsetMinutes * MINUTE_IN_MS,
+    dateValue.getTime() - timezoneOffsetMinutes * MINUTE_IN_MS,
   );
 
-  const endAt = new Date(
-    startAt.getTime() + DAY_IN_MS,
-  );
+  const endAt = new Date(startAt.getTime() + DAY_IN_MS);
 
   return {
     now,
@@ -117,61 +105,48 @@ function getLocalDateInformation() {
   };
 }
 
-function getLocalMonthRange(
-  now: Date,
-  timezoneOffsetMinutes: number,
-) {
+function getLocalMonthRange(now: Date, timezoneOffsetMinutes: number) {
   const shiftedNow = new Date(
-    now.getTime() +
-      timezoneOffsetMinutes * MINUTE_IN_MS,
+    now.getTime() + timezoneOffsetMinutes * MINUTE_IN_MS,
   );
 
   const localMonthStart = new Date(
-    Date.UTC(
-      shiftedNow.getUTCFullYear(),
-      shiftedNow.getUTCMonth(),
-      1,
-    ),
+    Date.UTC(shiftedNow.getUTCFullYear(), shiftedNow.getUTCMonth(), 1),
   );
 
   const localNextMonthStart = new Date(
-    Date.UTC(
-      shiftedNow.getUTCFullYear(),
-      shiftedNow.getUTCMonth() + 1,
-      1,
-    ),
+    Date.UTC(shiftedNow.getUTCFullYear(), shiftedNow.getUTCMonth() + 1, 1),
   );
 
   return {
     monthStartAt: new Date(
-      localMonthStart.getTime() -
-        timezoneOffsetMinutes * MINUTE_IN_MS,
+      localMonthStart.getTime() - timezoneOffsetMinutes * MINUTE_IN_MS,
     ),
     nextMonthStartAt: new Date(
-      localNextMonthStart.getTime() -
-        timezoneOffsetMinutes * MINUTE_IN_MS,
+      localNextMonthStart.getTime() - timezoneOffsetMinutes * MINUTE_IN_MS,
     ),
   };
 }
 
-function addDays(
-  date: Date,
-  numberOfDays: number,
-): Date {
-  return new Date(
-    date.getTime() +
-      numberOfDays * DAY_IN_MS,
-  );
+function addDays(date: Date, numberOfDays: number): Date {
+  return new Date(date.getTime() + numberOfDays * DAY_IN_MS);
 }
 
 function getDateKey(date: Date): string {
   return date.toISOString().slice(0, 10);
 }
 
-function formatNumber(value: number): string {
-  return new Intl.NumberFormat("tr-TR").format(
-    value,
+function getLocalDateKeyFromTimestamp(
+  date: Date,
+  timezoneOffsetMinutes: number,
+): string {
+  return getDateKey(
+    new Date(date.getTime() + timezoneOffsetMinutes * MINUTE_IN_MS),
   );
+}
+
+function formatNumber(value: number): string {
+  return new Intl.NumberFormat("tr-TR").format(value);
 }
 
 function formatCurrency(value: number): string {
@@ -183,9 +158,7 @@ function formatCurrency(value: number): string {
   }).format(value);
 }
 
-function decimalToNumber(
-  value: unknown,
-): number {
+function decimalToNumber(value: unknown): number {
   if (typeof value === "number") {
     return Number.isFinite(value) ? value : 0;
   }
@@ -193,9 +166,7 @@ function decimalToNumber(
   if (typeof value === "string") {
     const parsedValue = Number(value);
 
-    return Number.isFinite(parsedValue)
-      ? parsedValue
-      : 0;
+    return Number.isFinite(parsedValue) ? parsedValue : 0;
   }
 
   if (
@@ -204,22 +175,15 @@ function decimalToNumber(
     "toString" in value &&
     typeof value.toString === "function"
   ) {
-    const parsedValue = Number(
-      value.toString(),
-    );
+    const parsedValue = Number(value.toString());
 
-    return Number.isFinite(parsedValue)
-      ? parsedValue
-      : 0;
+    return Number.isFinite(parsedValue) ? parsedValue : 0;
   }
 
   return 0;
 }
 
-function formatPercentage(
-  clicks: number,
-  views: number,
-): string {
+function formatPercentage(clicks: number, views: number): string {
   if (views <= 0) {
     return "0%";
   }
@@ -259,20 +223,12 @@ function getDayLabel(date: Date): string {
   }).format(date);
 }
 
-function getBarHeight(
-  value: number,
-  maximumValue: number,
-): number {
+function getBarHeight(value: number, maximumValue: number): number {
   if (value <= 0 || maximumValue <= 0) {
     return 0;
   }
 
-  return Math.max(
-    7,
-    Math.round(
-      (value / maximumValue) * 100,
-    ),
-  );
+  return Math.max(7, Math.round((value / maximumValue) * 100));
 }
 
 export default async function PanelPage() {
@@ -286,29 +242,18 @@ export default async function PanelPage() {
     timezoneOffsetMinutes,
   } = getLocalDateInformation();
 
-  const {
-    monthStartAt,
-    nextMonthStartAt,
-  } = getLocalMonthRange(
+  const { monthStartAt, nextMonthStartAt } = getLocalMonthRange(
     now,
     timezoneOffsetMinutes,
   );
 
-  const sevenDayStartDate = addDays(
-    todayDate,
-    -6,
-  );
+  const sevenDayStartDate = addDays(todayDate, -6);
 
-  const thirtyDayStartDate = addDays(
-    todayDate,
-    -29,
-  );
+  const sevenDayStartAt = addDays(todayStartAt, -6);
 
   const sevenDaysLater = addDays(now, 7);
 
-  const activeSessionThreshold = new Date(
-    Date.now() - 2 * MINUTE_IN_MS,
-  );
+  const activeSessionThreshold = new Date(Date.now() - 2 * MINUTE_IN_MS);
 
   const [
     settings,
@@ -319,9 +264,8 @@ export default async function PanelPage() {
     todayWhatsappClicks,
     todayUniqueVisitors,
     activeVisitors,
-    previousDailyTotals,
-    previousProductRows,
-    todayProductTotals,
+    sevenDayEvents,
+    sevenDayProductTotals,
     activeSubscriptionSummary,
     thisMonthPaymentSummary,
     totalPaymentSummary,
@@ -350,8 +294,7 @@ export default async function PanelPage() {
 
     prisma.analyticsEvent.count({
       where: {
-        eventType:
-          AnalyticsEventType.PAGE_VIEW,
+        eventType: AnalyticsEventType.PAGE_VIEW,
         createdAt: {
           gte: todayStartAt,
           lt: todayEndAt,
@@ -361,8 +304,7 @@ export default async function PanelPage() {
 
     prisma.analyticsEvent.count({
       where: {
-        eventType:
-          AnalyticsEventType.PRODUCT_VIEW,
+        eventType: AnalyticsEventType.PRODUCT_VIEW,
         createdAt: {
           gte: todayStartAt,
           lt: todayEndAt,
@@ -372,8 +314,7 @@ export default async function PanelPage() {
 
     prisma.analyticsEvent.count({
       where: {
-        eventType:
-          AnalyticsEventType.WHATSAPP_CLICK,
+        eventType: AnalyticsEventType.WHATSAPP_CLICK,
         createdAt: {
           gte: todayStartAt,
           lt: todayEndAt,
@@ -383,8 +324,7 @@ export default async function PanelPage() {
 
     prisma.analyticsEvent.findMany({
       where: {
-        eventType:
-          AnalyticsEventType.PAGE_VIEW,
+        eventType: AnalyticsEventType.PAGE_VIEW,
         createdAt: {
           gte: todayStartAt,
           lt: todayEndAt,
@@ -408,46 +348,19 @@ export default async function PanelPage() {
       },
     }),
 
-    prisma.dailyAnalytics.groupBy({
-      by: ["date", "eventType"],
+    prisma.analyticsEvent.findMany({
       where: {
-        date: {
-          gte: sevenDayStartDate,
-          lt: todayDate,
+        createdAt: {
+          gte: sevenDayStartAt,
+          lt: todayEndAt,
         },
         eventType: {
-          in: [
-            AnalyticsEventType.PAGE_VIEW,
-            AnalyticsEventType.WHATSAPP_CLICK,
-          ],
-        },
-      },
-      _sum: {
-        eventCount: true,
-      },
-    }),
-
-    prisma.dailyAnalytics.findMany({
-      where: {
-        date: {
-          gte: thirtyDayStartDate,
-          lt: todayDate,
-        },
-        productId: {
-          not: null,
-        },
-        eventType: {
-          in: [
-            AnalyticsEventType.PRODUCT_VIEW,
-            AnalyticsEventType.WHATSAPP_CLICK,
-          ],
+          in: [AnalyticsEventType.PAGE_VIEW, AnalyticsEventType.WHATSAPP_CLICK],
         },
       },
       select: {
-        productId: true,
-        productName: true,
         eventType: true,
-        eventCount: true,
+        createdAt: true,
       },
     }),
 
@@ -455,7 +368,7 @@ export default async function PanelPage() {
       by: ["productId", "eventType"],
       where: {
         createdAt: {
-          gte: todayStartAt,
+          gte: sevenDayStartAt,
           lt: todayEndAt,
         },
         productId: {
@@ -604,39 +517,22 @@ export default async function PanelPage() {
     }),
   ]);
 
-  const expectedMonthlyRevenue =
-    decimalToNumber(
-      activeSubscriptionSummary._sum
-        .subscriptionFee,
-    );
+  const expectedMonthlyRevenue = decimalToNumber(
+    activeSubscriptionSummary._sum.subscriptionFee,
+  );
 
-  const thisMonthCollected =
-    decimalToNumber(
-      thisMonthPaymentSummary._sum.amount,
-    );
+  const thisMonthCollected = decimalToNumber(
+    thisMonthPaymentSummary._sum.amount,
+  );
 
-  const totalCollected =
-    decimalToNumber(
-      totalPaymentSummary._sum.amount,
-    );
+  const totalCollected = decimalToNumber(totalPaymentSummary._sum.amount);
 
-  const activeSubscriptionCount =
-    activeSubscriptionSummary._count._all;
+  const activeSubscriptionCount = activeSubscriptionSummary._count._all;
 
-  const chartByDate = new Map<
-    string,
-    DayChartData
-  >();
+  const chartByDate = new Map<string, DayChartData>();
 
-  for (
-    let index = 0;
-    index < 7;
-    index += 1
-  ) {
-    const date = addDays(
-      sevenDayStartDate,
-      index,
-    );
+  for (let index = 0; index < 7; index += 1) {
+    const date = addDays(sevenDayStartDate, index);
 
     const dateKey = getDateKey(date);
 
@@ -649,143 +545,62 @@ export default async function PanelPage() {
     });
   }
 
-  for (const row of previousDailyTotals) {
-    const dateKey = getDateKey(row.date);
+  for (const row of sevenDayEvents) {
+    const dateKey = getLocalDateKeyFromTimestamp(
+      row.createdAt,
+      timezoneOffsetMinutes,
+    );
     const day = chartByDate.get(dateKey);
 
     if (!day) {
       continue;
     }
 
-    const eventCount =
-      row._sum.eventCount ?? 0;
-
-    if (
-      row.eventType ===
-      AnalyticsEventType.PAGE_VIEW
-    ) {
-      day.pageViews += eventCount;
+    if (row.eventType === AnalyticsEventType.PAGE_VIEW) {
+      day.pageViews += 1;
     }
 
-    if (
-      row.eventType ===
-      AnalyticsEventType.WHATSAPP_CLICK
-    ) {
-      day.whatsappClicks += eventCount;
+    if (row.eventType === AnalyticsEventType.WHATSAPP_CLICK) {
+      day.whatsappClicks += 1;
     }
   }
 
-  const todayDateKey =
-    getDateKey(todayDate);
-
-  const todayChartData =
-    chartByDate.get(todayDateKey);
-
-  if (todayChartData) {
-    todayChartData.pageViews =
-      todayPageViews;
-
-    todayChartData.whatsappClicks =
-      todayWhatsappClicks;
-  }
-
-  const chartData = Array.from(
-    chartByDate.values(),
-  );
+  const chartData = Array.from(chartByDate.values());
 
   const chartMaximum = Math.max(
     1,
-    ...chartData.flatMap((day) => [
-      day.pageViews,
-      day.whatsappClicks,
-    ]),
+    ...chartData.flatMap((day) => [day.pageViews, day.whatsappClicks]),
   );
 
-  const productAnalyticsMap = new Map<
-    string,
-    ProductAnalytics
-  >();
+  const productAnalyticsMap = new Map<string, ProductAnalytics>();
 
-  for (const row of previousProductRows) {
+  for (const row of sevenDayProductTotals) {
     if (!row.productId) {
       continue;
     }
 
-    const existing =
-      productAnalyticsMap.get(
-        row.productId,
-      ) ?? {
-        productId: row.productId,
-        productName:
-          row.productName ||
-          "Silinmiş ürün",
-        slug: null,
-        views: 0,
-        clicks: 0,
-      };
+    const existing = productAnalyticsMap.get(row.productId) ?? {
+      productId: row.productId,
+      productName: "Ürün",
+      slug: null,
+      views: 0,
+      clicks: 0,
+    };
 
-    if (
-      row.eventType ===
-      AnalyticsEventType.PRODUCT_VIEW
-    ) {
-      existing.views += row.eventCount;
-    }
+    const eventCount = row._count._all;
 
-    if (
-      row.eventType ===
-      AnalyticsEventType.WHATSAPP_CLICK
-    ) {
-      existing.clicks += row.eventCount;
-    }
-
-    productAnalyticsMap.set(
-      row.productId,
-      existing,
-    );
-  }
-
-  for (const row of todayProductTotals) {
-    if (!row.productId) {
-      continue;
-    }
-
-    const existing =
-      productAnalyticsMap.get(
-        row.productId,
-      ) ?? {
-        productId: row.productId,
-        productName: "Ürün",
-        slug: null,
-        views: 0,
-        clicks: 0,
-      };
-
-    const eventCount =
-      row._count._all;
-
-    if (
-      row.eventType ===
-      AnalyticsEventType.PRODUCT_VIEW
-    ) {
+    if (row.eventType === AnalyticsEventType.PRODUCT_VIEW) {
       existing.views += eventCount;
     }
 
-    if (
-      row.eventType ===
-      AnalyticsEventType.WHATSAPP_CLICK
-    ) {
+    if (row.eventType === AnalyticsEventType.WHATSAPP_CLICK) {
       existing.clicks += eventCount;
     }
 
-    productAnalyticsMap.set(
-      row.productId,
-      existing,
-    );
+    productAnalyticsMap.set(row.productId, existing);
   }
 
-  const productIds = Array.from(
-    productAnalyticsMap.keys(),
-  );
+  const productIds = Array.from(productAnalyticsMap.keys());
 
   const currentProducts =
     productIds.length > 0
@@ -804,8 +619,7 @@ export default async function PanelPage() {
       : [];
 
   for (const product of currentProducts) {
-    const analytics =
-      productAnalyticsMap.get(product.id);
+    const analytics = productAnalyticsMap.get(product.id);
 
     if (!analytics) {
       continue;
@@ -815,51 +629,30 @@ export default async function PanelPage() {
     analytics.slug = product.slug;
   }
 
-  const topProducts = Array.from(
-    productAnalyticsMap.values(),
-  )
-    .sort(
-      (
-        firstProduct,
-        secondProduct,
-      ) => {
-        if (
-          secondProduct.views !==
-          firstProduct.views
-        ) {
-          return (
-            secondProduct.views -
-            firstProduct.views
-          );
-        }
+  const topProducts = Array.from(productAnalyticsMap.values())
+    .sort((firstProduct, secondProduct) => {
+      if (secondProduct.views !== firstProduct.views) {
+        return secondProduct.views - firstProduct.views;
+      }
 
-        return (
-          secondProduct.clicks -
-          firstProduct.clicks
-        );
-      },
-    )
-    .slice(0, 8);
+      return secondProduct.clicks - firstProduct.clicks;
+    })
+    .slice(0, 20);
 
-  const sevenDayPageViews =
-    chartData.reduce(
-      (total, day) =>
-        total + day.pageViews,
-      0,
-    );
+  const sevenDayPageViews = chartData.reduce(
+    (total, day) => total + day.pageViews,
+    0,
+  );
 
-  const sevenDayWhatsappClicks =
-    chartData.reduce(
-      (total, day) =>
-        total + day.whatsappClicks,
-      0,
-    );
+  const sevenDayWhatsappClicks = chartData.reduce(
+    (total, day) => total + day.whatsappClicks,
+    0,
+  );
 
-  const todayConversionRate =
-    formatPercentage(
-      todayWhatsappClicks,
-      todayProductViews,
-    );
+  const todayConversionRate = formatPercentage(
+    todayWhatsappClicks,
+    todayProductViews,
+  );
 
   const categoryRevenueMap = new Map<
     ProductCategory,
@@ -869,9 +662,7 @@ export default async function PanelPage() {
     }
   >();
 
-  for (const category of Object.values(
-    ProductCategory,
-  )) {
+  for (const category of Object.values(ProductCategory)) {
     categoryRevenueMap.set(category, {
       productCount: 0,
       revenue: 0,
@@ -881,126 +672,92 @@ export default async function PanelPage() {
   for (const row of categoryRevenueRows) {
     categoryRevenueMap.set(row.category, {
       productCount: row._count._all,
-      revenue: decimalToNumber(
-        row._sum.subscriptionFee,
-      ),
+      revenue: decimalToNumber(row._sum.subscriptionFee),
     });
   }
 
-  const categoryRevenueData =
-    Object.values(ProductCategory).map(
-      (category) => ({
-        category,
-        ...categoryInformation[category],
-        ...categoryRevenueMap.get(
-          category,
-        )!,
-      }),
-    );
+  const categoryRevenueData = Object.values(ProductCategory).map(
+    (category) => ({
+      category,
+      ...categoryInformation[category],
+      ...categoryRevenueMap.get(category)!,
+    }),
+  );
 
-  const maximumCategoryRevenue =
-    Math.max(
-      1,
-      ...categoryRevenueData.map(
-        (category) =>
-          category.revenue,
-      ),
-    );
+  const maximumCategoryRevenue = Math.max(
+    1,
+    ...categoryRevenueData.map((category) => category.revenue),
+  );
 
-  const subscriptionAlerts =
-    subscriptionAlertProducts
-      .flatMap((product) => {
-        const subscriptionEndsAt =
-          product.subscriptionEndsAt;
+  const subscriptionAlerts = subscriptionAlertProducts
+    .flatMap((product) => {
+      const subscriptionEndsAt = product.subscriptionEndsAt;
 
-        if (!subscriptionEndsAt) {
-          return [];
-        }
+      if (!subscriptionEndsAt) {
+        return [];
+      }
 
-        const remainingMilliseconds =
-          subscriptionEndsAt.getTime() -
-          now.getTime();
+      const remainingMilliseconds =
+        subscriptionEndsAt.getTime() - now.getTime();
 
-        const isExpired =
-          remainingMilliseconds <= 0;
+      const isExpired = remainingMilliseconds <= 0;
 
-        const remainingDays = isExpired
-          ? 0
-          : Math.max(
-              1,
-              Math.ceil(
-                remainingMilliseconds /
-                  DAY_IN_MS,
-              ),
-            );
+      const remainingDays = isExpired
+        ? 0
+        : Math.max(1, Math.ceil(remainingMilliseconds / DAY_IN_MS));
 
-        const overdueDays = isExpired
-          ? Math.max(
-              0,
-              Math.floor(
-                Math.abs(
-                  remainingMilliseconds,
-                ) / DAY_IN_MS,
-              ),
-            )
-          : 0;
+      const overdueDays = isExpired
+        ? Math.max(0, Math.floor(Math.abs(remainingMilliseconds) / DAY_IN_MS))
+        : 0;
 
-        const statusLabel = isExpired
-          ? overdueDays > 0
-            ? `${overdueDays} gün önce doldu`
-            : "Süresi doldu"
-          : remainingDays === 1
-            ? "1 gün kaldı"
-            : `${remainingDays} gün kaldı`;
+      const statusLabel = isExpired
+        ? overdueDays > 0
+          ? `${overdueDays} gün önce doldu`
+          : "Süresi doldu"
+        : remainingDays === 1
+          ? "1 gün kaldı"
+          : `${remainingDays} gün kaldı`;
 
-        const statusClassName = isExpired
-          ? "border-red-200 bg-red-50 text-red-700"
-          : remainingDays <= 3
-            ? "border-orange-200 bg-orange-50 text-orange-700"
-            : "border-amber-200 bg-amber-50 text-amber-700";
+      const statusClassName = isExpired
+        ? "border-red-200 bg-red-50 text-red-700"
+        : remainingDays <= 3
+          ? "border-orange-200 bg-orange-50 text-orange-700"
+          : "border-amber-200 bg-amber-50 text-amber-700";
 
-        return [
-          {
-            ...product,
-            subscriptionEndsAt,
-            isExpired,
-            remainingDays,
-            statusLabel,
-            statusClassName,
-          },
-        ];
-      })
-      .sort((firstProduct, secondProduct) => {
-        if (
-          firstProduct.isExpired !==
-          secondProduct.isExpired
-        ) {
-          return firstProduct.isExpired
-            ? -1
-            : 1;
-        }
+      return [
+        {
+          ...product,
+          subscriptionEndsAt,
+          isExpired,
+          remainingDays,
+          statusLabel,
+          statusClassName,
+        },
+      ];
+    })
+    .sort((firstProduct, secondProduct) => {
+      if (firstProduct.isExpired !== secondProduct.isExpired) {
+        return firstProduct.isExpired ? -1 : 1;
+      }
 
-        const firstEndTime =
-          firstProduct.subscriptionEndsAt.getTime();
+      const firstEndTime = firstProduct.subscriptionEndsAt.getTime();
 
-        const secondEndTime =
-          secondProduct.subscriptionEndsAt.getTime();
+      const secondEndTime = secondProduct.subscriptionEndsAt.getTime();
 
-        if (firstProduct.isExpired) {
-          return secondEndTime - firstEndTime;
-        }
+      if (firstProduct.isExpired) {
+        return secondEndTime - firstEndTime;
+      }
 
-        return firstEndTime - secondEndTime;
-      })
-      .slice(0, 12);
+      return firstEndTime - secondEndTime;
+    })
+    .slice(0, 12);
 
   return (
     <div className="space-y-8">
       <section className="flex flex-col gap-5 sm:flex-row sm:items-end sm:justify-between">
         <div>
           <p className="text-sm font-medium text-neutral-500">
-            {settings?.companyName ??
-              "Firma Kataloğu"}
+            {settings?.companyName ?? "Firma Kataloğu"}
           </p>
 
           <h1 className="mt-2 text-3xl font-semibold tracking-[-0.04em] text-neutral-950 sm:text-4xl">
@@ -1008,16 +765,14 @@ export default async function PanelPage() {
           </h1>
 
           <p className="mt-3 max-w-xl text-sm leading-6 text-neutral-500">
-            Katalog performansını, abonelik
-            gelirlerini ve yaklaşan yenilemeleri
+            Katalog performansını, abonelik gelirlerini ve yaklaşan yenilemeleri
             buradan takip edebilirsiniz.
           </p>
         </div>
 
         <div className="flex items-center gap-3">
           <p className="text-xs text-neutral-400">
-            Son güncelleme{" "}
-            {formatUpdateTime(now)}
+            Son güncelleme {formatUpdateTime(now)}
           </p>
 
           <Link
@@ -1036,17 +791,14 @@ export default async function PanelPage() {
           </h2>
 
           <p className="mt-1 text-sm text-neutral-500">
-            Abonelik ücretleri ve gerçek
-            tahsilat kayıtları
+            Abonelik ücretleri ve gerçek tahsilat kayıtları
           </p>
         </div>
 
         <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
           <MetricCard
             label="Beklenen aylık gelir"
-            value={formatCurrency(
-              expectedMonthlyRevenue,
-            )}
+            value={formatCurrency(expectedMonthlyRevenue)}
             description={`${formatNumber(
               activeSubscriptionCount,
             )} aktif abonelik`}
@@ -1056,12 +808,9 @@ export default async function PanelPage() {
 
           <MetricCard
             label="Bu ay tahsil edilen"
-            value={formatCurrency(
-              thisMonthCollected,
-            )}
+            value={formatCurrency(thisMonthCollected)}
             description={`${formatNumber(
-              thisMonthPaymentSummary._count
-                ._all,
+              thisMonthPaymentSummary._count._all,
             )} ödeme kaydı`}
             icon="A"
             iconClassName="bg-blue-50 text-blue-700"
@@ -1069,12 +818,9 @@ export default async function PanelPage() {
 
           <MetricCard
             label="Toplam kazanç"
-            value={formatCurrency(
-              totalCollected,
-            )}
+            value={formatCurrency(totalCollected)}
             description={`${formatNumber(
-              totalPaymentSummary._count
-                ._all,
+              totalPaymentSummary._count._all,
             )} toplam ödeme`}
             icon="T"
             iconClassName="bg-violet-50 text-violet-700"
@@ -1082,9 +828,7 @@ export default async function PanelPage() {
 
           <MetricCard
             label="Yaklaşan yenileme"
-            value={formatNumber(
-              expiringSoonCount,
-            )}
+            value={formatNumber(expiringSoonCount)}
             description={`${formatNumber(
               expiredSubscriptionCount,
             )} süresi dolmuş ürün`}
@@ -1104,17 +848,13 @@ export default async function PanelPage() {
 
               {subscriptionAlerts.length > 0 ? (
                 <span className="rounded-full border border-orange-200 bg-orange-50 px-2.5 py-1 text-[10px] font-bold text-orange-700">
-                  {formatNumber(
-                    subscriptionAlerts.length,
-                  )}{" "}
-                  işlem bekliyor
+                  {formatNumber(subscriptionAlerts.length)} işlem bekliyor
                 </span>
               ) : null}
             </div>
 
             <p className="mt-1 text-sm text-neutral-500">
-              Süresi dolan ve 7 gün içinde
-              yenilenmesi gereken ürünler
+              Süresi dolan ve 7 gün içinde yenilenmesi gereken ürünler
             </p>
           </div>
 
@@ -1128,98 +868,83 @@ export default async function PanelPage() {
 
         {subscriptionAlerts.length > 0 ? (
           <div className="mt-6 divide-y divide-neutral-100 overflow-hidden rounded-2xl border border-neutral-100">
-            {subscriptionAlerts.map(
-              (product) => {
-                const information =
-                  categoryInformation[
-                    product.category
-                  ];
+            {subscriptionAlerts.map((product) => {
+              const information = categoryInformation[product.category];
 
-                return (
-                  <Link
-                    key={product.id}
-                    href={`/panel/urunler/${product.id}`}
-                    className="group flex flex-col gap-4 px-4 py-4 transition hover:bg-neutral-50 sm:flex-row sm:items-center sm:justify-between sm:px-5"
-                  >
-                    <div className="flex min-w-0 items-start gap-3">
-                      <span
-                        className={`mt-0.5 flex size-10 shrink-0 items-center justify-center rounded-xl border text-sm font-bold ${product.statusClassName}`}
-                      >
-                        {product.isExpired
-                          ? "!"
-                          : product.remainingDays}
-                      </span>
+              return (
+                <Link
+                  key={product.id}
+                  href={`/panel/urunler/${product.id}`}
+                  className="group flex flex-col gap-4 px-4 py-4 transition hover:bg-neutral-50 sm:flex-row sm:items-center sm:justify-between sm:px-5"
+                >
+                  <div className="flex min-w-0 items-start gap-3">
+                    <span
+                      className={`mt-0.5 flex size-10 shrink-0 items-center justify-center rounded-xl border text-sm font-bold ${product.statusClassName}`}
+                    >
+                      {product.isExpired ? "!" : product.remainingDays}
+                    </span>
 
-                      <div className="min-w-0">
-                        <div className="flex flex-wrap items-center gap-2">
-                          <p className="truncate text-sm font-semibold text-neutral-900">
-                            {product.name}
-                          </p>
-
-                          <span
-                            className={`rounded-full border px-2 py-0.5 text-[9px] font-bold uppercase tracking-wide ${information.badgeClassName}`}
-                          >
-                            {information.label}
-                          </span>
-
-                          {!product.isActive ? (
-                            <span className="rounded-full border border-neutral-200 bg-neutral-100 px-2 py-0.5 text-[9px] font-bold uppercase tracking-wide text-neutral-500">
-                              Pasif
-                            </span>
-                          ) : null}
-                        </div>
-
-                        <div className="mt-1.5 flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-neutral-400">
-                          <span
-                            className={`font-semibold ${
-                              product.isExpired
-                                ? "text-red-600"
-                                : product.remainingDays <=
-                                    3
-                                  ? "text-orange-600"
-                                  : "text-amber-600"
-                            }`}
-                          >
-                            {product.statusLabel}
-                          </span>
-
-                          <span aria-hidden="true">
-                            ·
-                          </span>
-
-                          <span>
-                            Bitiş:{" "}
-                            {formatDateTime(
-                              product.subscriptionEndsAt,
-                            )}
-                          </span>
-                        </div>
-                      </div>
-                    </div>
-
-                    <div className="flex items-center justify-between gap-4 pl-[52px] sm:pl-0">
-                      <div className="text-left sm:text-right">
-                        <p className="text-sm font-semibold text-neutral-900">
-                          {formatCurrency(
-                            decimalToNumber(
-                              product.subscriptionFee,
-                            ),
-                          )}
+                    <div className="min-w-0">
+                      <div className="flex flex-wrap items-center gap-2">
+                        <p className="truncate text-sm font-semibold text-neutral-900">
+                          {product.name}
                         </p>
 
-                        <p className="mt-0.5 text-[10px] uppercase tracking-wide text-neutral-400">
-                          Aylık ücret
-                        </p>
+                        <span
+                          className={`rounded-full border px-2 py-0.5 text-[9px] font-bold uppercase tracking-wide ${information.badgeClassName}`}
+                        >
+                          {information.label}
+                        </span>
+
+                        {!product.isActive ? (
+                          <span className="rounded-full border border-neutral-200 bg-neutral-100 px-2 py-0.5 text-[9px] font-bold uppercase tracking-wide text-neutral-500">
+                            Pasif
+                          </span>
+                        ) : null}
                       </div>
 
-                      <span className="flex size-9 items-center justify-center rounded-xl border border-neutral-200 bg-white text-sm text-neutral-500 transition group-hover:border-neutral-950 group-hover:bg-neutral-950 group-hover:text-white">
-                        →
-                      </span>
+                      <div className="mt-1.5 flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-neutral-400">
+                        <span
+                          className={`font-semibold ${
+                            product.isExpired
+                              ? "text-red-600"
+                              : product.remainingDays <= 3
+                                ? "text-orange-600"
+                                : "text-amber-600"
+                          }`}
+                        >
+                          {product.statusLabel}
+                        </span>
+
+                        <span aria-hidden="true">·</span>
+
+                        <span>
+                          Bitiş: {formatDateTime(product.subscriptionEndsAt)}
+                        </span>
+                      </div>
                     </div>
-                  </Link>
-                );
-              },
-            )}
+                  </div>
+
+                  <div className="flex items-center justify-between gap-4 pl-[52px] sm:pl-0">
+                    <div className="text-left sm:text-right">
+                      <p className="text-sm font-semibold text-neutral-900">
+                        {formatCurrency(
+                          decimalToNumber(product.subscriptionFee),
+                        )}
+                      </p>
+
+                      <p className="mt-0.5 text-[10px] uppercase tracking-wide text-neutral-400">
+                        Aylık ücret
+                      </p>
+                    </div>
+
+                    <span className="flex size-9 items-center justify-center rounded-xl border border-neutral-200 bg-white text-sm text-neutral-500 transition group-hover:border-neutral-950 group-hover:bg-neutral-950 group-hover:text-white">
+                      →
+                    </span>
+                  </div>
+                </Link>
+              );
+            })}
           </div>
         ) : (
           <div className="mt-6 rounded-2xl border border-dashed border-green-200 bg-green-50 px-5 py-10 text-center">
@@ -1232,8 +957,7 @@ export default async function PanelPage() {
             </p>
 
             <p className="mt-2 text-xs leading-5 text-green-700">
-              Önümüzdeki 7 gün içinde süresi
-              dolacak veya süresi geçmiş ürün
+              Önümüzdeki 7 gün içinde süresi dolacak veya süresi geçmiş ürün
               bulunmuyor.
             </p>
           </div>
@@ -1254,21 +978,15 @@ export default async function PanelPage() {
         <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
           <MetricCard
             label="Bugünkü ziyaretçi"
-            value={formatNumber(
-              todayUniqueVisitors.length,
-            )}
-            description={`${formatNumber(
-              todayPageViews,
-            )} sayfa görüntüleme`}
+            value={formatNumber(todayUniqueVisitors.length)}
+            description={`${formatNumber(todayPageViews)} sayfa görüntüleme`}
             icon="Z"
             iconClassName="bg-blue-50 text-blue-700"
           />
 
           <MetricCard
             label="Ürün görüntüleme"
-            value={formatNumber(
-              todayProductViews,
-            )}
+            value={formatNumber(todayProductViews)}
             description="Bugünkü toplam inceleme"
             icon="Ü"
             iconClassName="bg-violet-50 text-violet-700"
@@ -1276,9 +994,7 @@ export default async function PanelPage() {
 
           <MetricCard
             label="WhatsApp tıklaması"
-            value={formatNumber(
-              todayWhatsappClicks,
-            )}
+            value={formatNumber(todayWhatsappClicks)}
             description={`${todayConversionRate} dönüşüm oranı`}
             icon="W"
             iconClassName="bg-green-50 text-green-700"
@@ -1286,9 +1002,7 @@ export default async function PanelPage() {
 
           <MetricCard
             label="Şu anda aktif"
-            value={formatNumber(
-              activeVisitors.length,
-            )}
+            value={formatNumber(activeVisitors.length)}
             description="Son 2 dakika içinde"
             icon="A"
             iconClassName="bg-orange-50 text-orange-700"
@@ -1306,8 +1020,7 @@ export default async function PanelPage() {
               </h2>
 
               <p className="mt-1 text-sm text-neutral-500">
-                Sayfa görüntüleme ve WhatsApp
-                tıklama hareketleri
+                Sayfa görüntüleme ve WhatsApp tıklama hareketleri
               </p>
             </div>
 
@@ -1327,15 +1040,10 @@ export default async function PanelPage() {
           <div className="mt-8 overflow-x-auto pb-2">
             <div className="grid min-w-[600px] grid-cols-7 gap-3">
               {chartData.map((day) => (
-                <div
-                  key={day.dateKey}
-                  className="flex min-w-0 flex-col"
-                >
+                <div key={day.dateKey} className="flex min-w-0 flex-col">
                   <div className="mb-3 text-center">
                     <p className="text-xs font-semibold text-neutral-800">
-                      {formatNumber(
-                        day.pageViews,
-                      )}
+                      {formatNumber(day.pageViews)}
                     </p>
 
                     <p className="mt-0.5 text-[10px] text-green-700">
@@ -1348,10 +1056,7 @@ export default async function PanelPage() {
                       title={`${day.pageViews} sayfa görüntüleme`}
                       className="w-4 rounded-t-md bg-neutral-900 transition-all"
                       style={{
-                        height: `${getBarHeight(
-                          day.pageViews,
-                          chartMaximum,
-                        )}%`,
+                        height: `${getBarHeight(day.pageViews, chartMaximum)}%`,
                       }}
                     />
 
@@ -1378,16 +1083,12 @@ export default async function PanelPage() {
           <div className="mt-6 grid gap-3 border-t border-neutral-100 pt-5 sm:grid-cols-2">
             <SummaryValue
               label="7 günlük sayfa görüntüleme"
-              value={formatNumber(
-                sevenDayPageViews,
-              )}
+              value={formatNumber(sevenDayPageViews)}
             />
 
             <SummaryValue
               label="7 günlük WhatsApp tıklaması"
-              value={formatNumber(
-                sevenDayWhatsappClicks,
-              )}
+              value={formatNumber(sevenDayWhatsappClicks)}
             />
           </div>
         </div>
@@ -1398,51 +1099,36 @@ export default async function PanelPage() {
           </p>
 
           <p className="mt-3 text-4xl font-semibold tracking-[-0.04em]">
-            {formatNumber(
-              activeSubscriptionCount,
-            )}
+            {formatNumber(activeSubscriptionCount)}
           </p>
 
-          <p className="mt-1 text-sm text-white/60">
-            aktif abonelik
-          </p>
+          <p className="mt-1 text-sm text-white/60">aktif abonelik</p>
 
           <div className="mt-8 space-y-4">
             <StatusRow
               label="Toplam ürün"
-              value={formatNumber(
-                totalProducts,
-              )}
+              value={formatNumber(totalProducts)}
             />
 
             <StatusRow
               label="Yayınlanan ürün"
-              value={formatNumber(
-                activeProducts,
-              )}
+              value={formatNumber(activeProducts)}
             />
 
             <StatusRow
               label="Pasif ürün"
-              value={formatNumber(
-                totalProducts -
-                  activeProducts,
-              )}
+              value={formatNumber(totalProducts - activeProducts)}
             />
 
             <StatusRow
               label="7 gün içinde bitecek"
-              value={formatNumber(
-                expiringSoonCount,
-              )}
+              value={formatNumber(expiringSoonCount)}
               valueClassName="text-orange-300"
             />
 
             <StatusRow
               label="Süresi dolmuş"
-              value={formatNumber(
-                expiredSubscriptionCount,
-              )}
+              value={formatNumber(expiredSubscriptionCount)}
               valueClassName="text-red-300"
               last
             />
@@ -1465,63 +1151,53 @@ export default async function PanelPage() {
             </h2>
 
             <p className="mt-1 text-sm text-neutral-500">
-              Aktif aboneliklerin aylık gelir
-              dağılımı
+              Aktif aboneliklerin aylık gelir dağılımı
             </p>
           </div>
 
           <div className="mt-6 space-y-5">
-            {categoryRevenueData.map(
-              (category) => {
-                const width =
-                  category.revenue <= 0
-                    ? 0
-                    : Math.max(
-                        4,
-                        Math.round(
-                          (category.revenue /
-                            maximumCategoryRevenue) *
-                            100,
-                        ),
-                      );
+            {categoryRevenueData.map((category) => {
+              const width =
+                category.revenue <= 0
+                  ? 0
+                  : Math.max(
+                      4,
+                      Math.round(
+                        (category.revenue / maximumCategoryRevenue) * 100,
+                      ),
+                    );
 
-                return (
-                  <div
-                    key={category.category}
-                  >
-                    <div className="flex items-center justify-between gap-4">
-                      <div className="flex items-center gap-3">
-                        <span
-                          className={`rounded-full border px-2.5 py-1 text-[10px] font-bold uppercase tracking-[0.12em] ${category.badgeClassName}`}
-                        >
-                          {category.label}
-                        </span>
+              return (
+                <div key={category.category}>
+                  <div className="flex items-center justify-between gap-4">
+                    <div className="flex items-center gap-3">
+                      <span
+                        className={`rounded-full border px-2.5 py-1 text-[10px] font-bold uppercase tracking-[0.12em] ${category.badgeClassName}`}
+                      >
+                        {category.label}
+                      </span>
 
-                        <span className="text-xs text-neutral-400">
-                          {category.productCount}{" "}
-                          ürün
-                        </span>
-                      </div>
-
-                      <p className="text-sm font-semibold text-neutral-900">
-                        {formatCurrency(
-                          category.revenue,
-                        )}
-                      </p>
+                      <span className="text-xs text-neutral-400">
+                        {category.productCount} ürün
+                      </span>
                     </div>
 
-                    <div className="mt-3 h-2 overflow-hidden rounded-full bg-neutral-100">
-                      <div
-                        className={`h-full rounded-full ${category.barClassName}`}
-                        style={{
-                          width: `${width}%`,
-                        }}
-                      />
-                    </div>
+                    <p className="text-sm font-semibold text-neutral-900">
+                      {formatCurrency(category.revenue)}
+                    </p>
                   </div>
-                );
-              },
-            )}
+
+                  <div className="mt-3 h-2 overflow-hidden rounded-full bg-neutral-100">
+                    <div
+                      className={`h-full rounded-full ${category.barClassName}`}
+                      style={{
+                        width: `${width}%`,
+                      }}
+                    />
+                  </div>
+                </div>
+              );
+            })}
           </div>
 
           <div className="mt-6 rounded-2xl bg-neutral-50 px-4 py-4">
@@ -1531,9 +1207,7 @@ export default async function PanelPage() {
               </p>
 
               <p className="text-lg font-semibold text-neutral-950">
-                {formatCurrency(
-                  expectedMonthlyRevenue,
-                )}
+                {formatCurrency(expectedMonthlyRevenue)}
               </p>
             </div>
           </div>
@@ -1547,88 +1221,66 @@ export default async function PanelPage() {
               </h2>
 
               <p className="mt-1 text-sm text-neutral-500">
-                En son kaydedilen abonelik
-                tahsilatları
+                En son kaydedilen abonelik tahsilatları
               </p>
             </div>
 
-            <span className="text-xs text-neutral-400">
-              Son 6 kayıt
-            </span>
+            <span className="text-xs text-neutral-400">Son 6 kayıt</span>
           </div>
 
           {recentPayments.length > 0 ? (
             <div className="mt-6 divide-y divide-neutral-100 overflow-hidden rounded-2xl border border-neutral-100">
-              {recentPayments.map(
-                (payment) => {
-                  const information =
-                    categoryInformation[
-                      payment.category
-                    ];
+              {recentPayments.map((payment) => {
+                const information = categoryInformation[payment.category];
 
-                  const content = (
-                    <>
-                      <div className="min-w-0">
-                        <div className="flex flex-wrap items-center gap-2">
-                          <p className="truncate text-sm font-semibold text-neutral-900">
-                            {
-                              payment.productName
-                            }
-                          </p>
-
-                          <span
-                            className={`rounded-full border px-2 py-0.5 text-[9px] font-bold uppercase tracking-wide ${information.badgeClassName}`}
-                          >
-                            {information.label}
-                          </span>
-                        </div>
-
-                        <p className="mt-1 text-xs text-neutral-400">
-                          {
-                            paymentTypeLabels[
-                              payment.type
-                            ]
-                          }{" "}
-                          ·{" "}
-                          {formatDateTime(
-                            payment.paidAt,
-                          )}
+                const content = (
+                  <>
+                    <div className="min-w-0">
+                      <div className="flex flex-wrap items-center gap-2">
+                        <p className="truncate text-sm font-semibold text-neutral-900">
+                          {payment.productName}
                         </p>
+
+                        <span
+                          className={`rounded-full border px-2 py-0.5 text-[9px] font-bold uppercase tracking-wide ${information.badgeClassName}`}
+                        >
+                          {information.label}
+                        </span>
                       </div>
 
-                      <p className="shrink-0 text-sm font-semibold text-green-700">
-                        +
-                        {formatCurrency(
-                          decimalToNumber(
-                            payment.amount,
-                          ),
-                        )}
+                      <p className="mt-1 text-xs text-neutral-400">
+                        {paymentTypeLabels[payment.type]} ·{" "}
+                        {formatDateTime(payment.paidAt)}
                       </p>
-                    </>
-                  );
+                    </div>
 
-                  if (payment.productId) {
-                    return (
-                      <Link
-                        key={payment.id}
-                        href={`/panel/urunler/${payment.productId}`}
-                        className="flex items-center justify-between gap-4 px-4 py-4 transition hover:bg-neutral-50"
-                      >
-                        {content}
-                      </Link>
-                    );
-                  }
+                    <p className="shrink-0 text-sm font-semibold text-green-700">
+                      +{formatCurrency(decimalToNumber(payment.amount))}
+                    </p>
+                  </>
+                );
 
+                if (payment.productId) {
                   return (
-                    <div
+                    <Link
                       key={payment.id}
-                      className="flex items-center justify-between gap-4 px-4 py-4"
+                      href={`/panel/urunler/${payment.productId}`}
+                      className="flex items-center justify-between gap-4 px-4 py-4 transition hover:bg-neutral-50"
                     >
                       {content}
-                    </div>
+                    </Link>
                   );
-                },
-              )}
+                }
+
+                return (
+                  <div
+                    key={payment.id}
+                    className="flex items-center justify-between gap-4 px-4 py-4"
+                  >
+                    {content}
+                  </div>
+                );
+              })}
             </div>
           ) : (
             <div className="mt-6 rounded-2xl border border-dashed border-neutral-200 bg-neutral-50 px-5 py-12 text-center">
@@ -1637,8 +1289,7 @@ export default async function PanelPage() {
               </p>
 
               <p className="mt-2 text-xs text-neutral-500">
-                Yeni ürün veya abonelik
-                yenilemesi kaydedildiğinde burada
+                Yeni ürün veya abonelik yenilemesi kaydedildiğinde burada
                 görünecek.
               </p>
             </div>
@@ -1654,12 +1305,12 @@ export default async function PanelPage() {
             </h2>
 
             <p className="mt-1 text-sm text-neutral-500">
-              Son 30 gün ve bugünkü veriler
+              Son 7 günün gerçek verileri
             </p>
           </div>
 
           <span className="text-xs text-neutral-400">
-            En fazla 8 ürün gösteriliyor
+            En fazla 20 ürün gösteriliyor
           </span>
         </div>
 
@@ -1668,94 +1319,77 @@ export default async function PanelPage() {
             <div className="hidden grid-cols-[minmax(0,1fr)_120px_120px_120px] gap-4 bg-neutral-50 px-5 py-3 text-xs font-semibold uppercase tracking-wide text-neutral-400 sm:grid">
               <span>Ürün</span>
 
-              <span className="text-right">
-                Görüntüleme
-              </span>
+              <span className="text-right">Görüntüleme</span>
 
-              <span className="text-right">
-                WhatsApp
-              </span>
+              <span className="text-right">WhatsApp</span>
 
-              <span className="text-right">
-                Dönüşüm
-              </span>
+              <span className="text-right">Dönüşüm</span>
             </div>
 
             <div className="divide-y divide-neutral-100">
-              {topProducts.map(
-                (product, index) => {
-                  const content = (
-                    <>
-                      <div className="flex min-w-0 items-center gap-3">
-                        <span className="flex size-9 shrink-0 items-center justify-center rounded-xl bg-neutral-100 text-xs font-semibold text-neutral-500">
-                          {index + 1}
-                        </span>
+              {topProducts.map((product, index) => {
+                const content = (
+                  <>
+                    <div className="flex min-w-0 items-center gap-3">
+                      <span className="flex size-9 shrink-0 items-center justify-center rounded-xl bg-neutral-100 text-xs font-semibold text-neutral-500">
+                        {index + 1}
+                      </span>
 
-                        <div className="min-w-0">
-                          <p className="truncate text-sm font-semibold text-neutral-900">
-                            {
-                              product.productName
-                            }
-                          </p>
+                      <div className="min-w-0">
+                        <p className="truncate text-sm font-semibold text-neutral-900">
+                          {product.productName}
+                        </p>
 
-                          <p className="mt-0.5 text-xs text-neutral-400">
-                            {product.slug
-                              ? "Ürün detayını aç"
-                              : "Silinmiş ürün kaydı"}
-                          </p>
-                        </div>
+                        <p className="mt-0.5 text-xs text-neutral-400">
+                          {product.slug
+                            ? "Ürün detayını aç"
+                            : "Silinmiş ürün kaydı"}
+                        </p>
                       </div>
+                    </div>
 
-                      <div className="grid grid-cols-3 gap-3 sm:contents">
-                        <StatisticCell
-                          label="Görüntüleme"
-                          value={formatNumber(
-                            product.views,
-                          )}
-                        />
+                    <div className="grid grid-cols-3 gap-3 sm:contents">
+                      <StatisticCell
+                        label="Görüntüleme"
+                        value={formatNumber(product.views)}
+                      />
 
-                        <StatisticCell
-                          label="WhatsApp"
-                          value={formatNumber(
-                            product.clicks,
-                          )}
-                        />
+                      <StatisticCell
+                        label="WhatsApp"
+                        value={formatNumber(product.clicks)}
+                      />
 
-                        <StatisticCell
-                          label="Dönüşüm"
-                          value={formatPercentage(
-                            product.clicks,
-                            product.views,
-                          )}
-                          highlighted
-                        />
-                      </div>
-                    </>
-                  );
+                      <StatisticCell
+                        label="Dönüşüm"
+                        value={formatPercentage(product.clicks, product.views)}
+                        highlighted
+                      />
+                    </div>
+                  </>
+                );
 
-                  if (product.slug) {
-                    return (
-                      <Link
-                        key={product.productId}
-                        href={`/urun/${product.slug}`}
-                        target="_blank"
-                        className="grid gap-4 px-4 py-4 transition hover:bg-neutral-50 sm:grid-cols-[minmax(0,1fr)_120px_120px_120px] sm:items-center sm:px-5"
-                      >
-                        {content}
-                      </Link>
-                    );
-                  }
-
+                if (product.slug) {
                   return (
-                    <div
+                    <Link
                       key={product.productId}
-                      className="grid gap-4 px-4 py-4 sm:grid-cols-[minmax(0,1fr)_120px_120px_120px] sm:items-center sm:px-5"
+                      href={`/urun/${product.slug}`}
+                      target="_blank"
+                      className="grid gap-4 px-4 py-4 transition hover:bg-neutral-50 sm:grid-cols-[minmax(0,1fr)_120px_120px_120px] sm:items-center sm:px-5"
                     >
                       {content}
-                    </div>
+                    </Link>
                   );
-                },
-              )}
+                }
+
+                return (
+                  <div
+                    key={product.productId}
+                    className="grid gap-4 px-4 py-4 sm:grid-cols-[minmax(0,1fr)_120px_120px_120px] sm:items-center sm:px-5"
+                  >
+                    {content}
+                  </div>
+                );
+              })}
             </div>
           </div>
         ) : (
@@ -1765,8 +1399,7 @@ export default async function PanelPage() {
             </p>
 
             <p className="mt-2 text-xs text-neutral-500">
-              Ürünler ziyaret edildikçe veriler
-              burada gösterilecek.
+              Ürünler ziyaret edildikçe veriler burada gösterilecek.
             </p>
           </div>
         )}
@@ -1797,9 +1430,7 @@ function MetricCard({
       <div className="flex items-start justify-between gap-4">
         <div className="min-w-0">
           <div className="flex items-center gap-2">
-            <p className="text-sm font-medium text-neutral-500">
-              {label}
-            </p>
+            <p className="text-sm font-medium text-neutral-500">{label}</p>
 
             {live ? (
               <span className="relative flex size-2">
@@ -1814,9 +1445,7 @@ function MetricCard({
             {value}
           </p>
 
-          <p className="mt-2 text-xs text-neutral-400">
-            {description}
-          </p>
+          <p className="mt-2 text-xs text-neutral-400">{description}</p>
         </div>
 
         <span
@@ -1834,19 +1463,12 @@ type SummaryValueProps = {
   value: string;
 };
 
-function SummaryValue({
-  label,
-  value,
-}: SummaryValueProps) {
+function SummaryValue({ label, value }: SummaryValueProps) {
   return (
     <div className="rounded-2xl bg-neutral-50 px-4 py-4">
-      <p className="text-xs text-neutral-500">
-        {label}
-      </p>
+      <p className="text-xs text-neutral-500">{label}</p>
 
-      <p className="mt-2 text-xl font-semibold text-neutral-950">
-        {value}
-      </p>
+      <p className="mt-2 text-xl font-semibold text-neutral-950">{value}</p>
     </div>
   );
 }
@@ -1870,9 +1492,7 @@ function StatisticCell({
 
       <p
         className={`mt-1 text-sm font-semibold sm:mt-0 ${
-          highlighted
-            ? "text-green-700"
-            : "text-neutral-800"
+          highlighted ? "text-green-700" : "text-neutral-800"
         }`}
       >
         {value}
@@ -1897,20 +1517,12 @@ function StatusRow({
   return (
     <div
       className={`flex items-center justify-between ${
-        last
-          ? ""
-          : "border-b border-white/10 pb-4"
+        last ? "" : "border-b border-white/10 pb-4"
       }`}
     >
-      <span className="text-sm text-white/60">
-        {label}
-      </span>
+      <span className="text-sm text-white/60">{label}</span>
 
-      <span
-        className={`text-sm font-semibold ${valueClassName}`}
-      >
-        {value}
-      </span>
+      <span className={`text-sm font-semibold ${valueClassName}`}>{value}</span>
     </div>
   );
 }

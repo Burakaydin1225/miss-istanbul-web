@@ -5,7 +5,7 @@ const MINUTE_IN_MS = 60 * 1_000;
 const HOUR_IN_MS = 60 * MINUTE_IN_MS;
 const DAY_IN_MS = 24 * HOUR_IN_MS;
 
-const DEFAULT_RETENTION_DAYS = 90;
+const ANALYTICS_RETENTION_DAYS = 7;
 const DEFAULT_ACTIVE_SESSION_RETENTION_HOURS = 24;
 const DEFAULT_TIMEZONE_OFFSET_MINUTES = 180;
 const DEFAULT_ROLLUP_DAYS = 7;
@@ -74,15 +74,6 @@ function getTimezoneOffsetMinutes(): number {
   );
 }
 
-function getRetentionDays(): number {
-  return readIntegerEnvironmentValue(
-    "ANALYTICS_RETENTION_DAYS",
-    DEFAULT_RETENTION_DAYS,
-    7,
-    3_650,
-  );
-}
-
 function getActiveSessionRetentionHours(): number {
   return readIntegerEnvironmentValue(
     "ANALYTICS_ACTIVE_SESSION_RETENTION_HOURS",
@@ -94,13 +85,8 @@ function getActiveSessionRetentionHours(): number {
 
 function formatUtcDateKey(date: Date): string {
   const year = date.getUTCFullYear();
-  const month = String(
-    date.getUTCMonth() + 1,
-  ).padStart(2, "0");
-  const day = String(date.getUTCDate()).padStart(
-    2,
-    "0",
-  );
+  const month = String(date.getUTCMonth() + 1).padStart(2, "0");
+  const day = String(date.getUTCDate()).padStart(2, "0");
 
   return `${year}-${month}-${day}`;
 }
@@ -110,13 +96,9 @@ function parseDateKey(value: string): Date | null {
     return null;
   }
 
-  const [year, month, day] = value
-    .split("-")
-    .map(Number);
+  const [year, month, day] = value.split("-").map(Number);
 
-  const date = new Date(
-    Date.UTC(year, month - 1, day),
-  );
+  const date = new Date(Date.UTC(year, month - 1, day));
 
   const isValid =
     date.getUTCFullYear() === year &&
@@ -138,10 +120,7 @@ function requireDateKey(value: string): Date {
   return date;
 }
 
-function addDays(
-  dateKey: string,
-  amount: number,
-): string {
+function addDays(dateKey: string, amount: number): string {
   const date = requireDateKey(dateKey);
 
   date.setUTCDate(date.getUTCDate() + amount);
@@ -150,63 +129,43 @@ function addDays(
 }
 
 function getCurrentLocalDateKey(): string {
-  const timezoneOffsetMinutes =
-    getTimezoneOffsetMinutes();
+  const timezoneOffsetMinutes = getTimezoneOffsetMinutes();
 
   const shiftedDate = new Date(
-    Date.now() +
-      timezoneOffsetMinutes * MINUTE_IN_MS,
+    Date.now() + timezoneOffsetMinutes * MINUTE_IN_MS,
   );
 
   return formatUtcDateKey(shiftedDate);
 }
 
-function getPreviousCompleteDateKeys(
-  numberOfDays: number,
-): string[] {
-  const currentLocalDate =
-    getCurrentLocalDateKey();
+function getPreviousCompleteDateKeys(numberOfDays: number): string[] {
+  const currentLocalDate = getCurrentLocalDateKey();
 
-  const yesterday = addDays(
-    currentLocalDate,
-    -1,
-  );
+  const yesterday = addDays(currentLocalDate, -1);
 
   const dateKeys: string[] = [];
 
-  for (
-    let dayIndex = numberOfDays - 1;
-    dayIndex >= 0;
-    dayIndex -= 1
-  ) {
-    dateKeys.push(
-      addDays(yesterday, -dayIndex),
-    );
+  for (let dayIndex = numberOfDays - 1; dayIndex >= 0; dayIndex -= 1) {
+    dateKeys.push(addDays(yesterday, -dayIndex));
   }
 
   return dateKeys;
 }
 
-function getUtcRangeForLocalDate(
-  dateKey: string,
-): {
+function getUtcRangeForLocalDate(dateKey: string): {
   dateValue: Date;
   startAt: Date;
   endAt: Date;
 } {
   const dateValue = requireDateKey(dateKey);
 
-  const timezoneOffsetMinutes =
-    getTimezoneOffsetMinutes();
+  const timezoneOffsetMinutes = getTimezoneOffsetMinutes();
 
   const startAt = new Date(
-    dateValue.getTime() -
-      timezoneOffsetMinutes * MINUTE_IN_MS,
+    dateValue.getTime() - timezoneOffsetMinutes * MINUTE_IN_MS,
   );
 
-  const endAt = new Date(
-    startAt.getTime() + DAY_IN_MS,
-  );
+  const endAt = new Date(startAt.getTime() + DAY_IN_MS);
 
   return {
     dateValue,
@@ -215,29 +174,20 @@ function getUtcRangeForLocalDate(
   };
 }
 
-function isSupportedEventType(
-  value: string,
-): value is AnalyticsEventType {
+function isSupportedEventType(value: string): value is AnalyticsEventType {
   return (
     value === AnalyticsEventType.PAGE_VIEW ||
-    value ===
-      AnalyticsEventType.PRODUCT_VIEW ||
-    value ===
-      AnalyticsEventType.WHATSAPP_CLICK
+    value === AnalyticsEventType.PRODUCT_VIEW ||
+    value === AnalyticsEventType.WHATSAPP_CLICK
   );
 }
 
 async function summarizeAnalyticsDate(
   dateKey: string,
 ): Promise<SummarizedDayResult> {
-  const {
-    dateValue,
-    startAt,
-    endAt,
-  } = getUtcRangeForLocalDate(dateKey);
+  const { dateValue, startAt, endAt } = getUtcRangeForLocalDate(dateKey);
 
-  const rawRows =
-    await prisma.$queryRaw<RawAggregateRow[]>`
+  const rawRows = await prisma.$queryRaw<RawAggregateRow[]>`
       SELECT
         "eventType"::text AS "eventType",
         "productId" AS "productId",
@@ -253,19 +203,15 @@ async function summarizeAnalyticsDate(
         "productId"
     `;
 
-  const aggregateRows = rawRows.filter(
-    (row) =>
-      isSupportedEventType(row.eventType),
+  const aggregateRows = rawRows.filter((row) =>
+    isSupportedEventType(row.eventType),
   );
 
   const productIds = Array.from(
     new Set(
       aggregateRows
         .map((row) => row.productId)
-        .filter(
-          (productId): productId is string =>
-            Boolean(productId),
-        ),
+        .filter((productId): productId is string => Boolean(productId)),
     ),
   );
 
@@ -285,55 +231,41 @@ async function summarizeAnalyticsDate(
       : [];
 
   const productNameById = new Map(
-    products.map((product) => [
-      product.id,
-      product.name,
-    ]),
+    products.map((product) => [product.id, product.name]),
   );
 
-  const summaryData = aggregateRows.map(
-    (row) => ({
-      date: dateValue,
-      eventType:
-        row.eventType as AnalyticsEventType,
-      scopeKey: row.productId
-        ? `product:${row.productId}`
-        : "global",
-      productId: row.productId,
-      productName: row.productId
-        ? productNameById.get(row.productId) ??
-          null
-        : null,
-      eventCount: Number(row.eventCount),
-      uniqueVisitors: Number(
-        row.uniqueVisitors,
-      ),
-    }),
-  );
+  const summaryData = aggregateRows.map((row) => ({
+    date: dateValue,
+    eventType: row.eventType as AnalyticsEventType,
+    scopeKey: row.productId ? `product:${row.productId}` : "global",
+    productId: row.productId,
+    productName: row.productId
+      ? (productNameById.get(row.productId) ?? null)
+      : null,
+    eventCount: Number(row.eventCount),
+    uniqueVisitors: Number(row.uniqueVisitors),
+  }));
 
-  await prisma.$transaction(
-    async (transaction) => {
-      /*
-       * Aynı gün tekrar özetlenirse eski sonuçlar
-       * tamamen silinip yeniden oluşturulur.
-       */
-      await transaction.dailyAnalytics.deleteMany({
-        where: {
-          date: dateValue,
-        },
+  await prisma.$transaction(async (transaction) => {
+    /*
+     * Aynı gün tekrar özetlenirse eski sonuçlar
+     * tamamen silinip yeniden oluşturulur.
+     */
+    await transaction.dailyAnalytics.deleteMany({
+      where: {
+        date: dateValue,
+      },
+    });
+
+    if (summaryData.length > 0) {
+      await transaction.dailyAnalytics.createMany({
+        data: summaryData,
       });
-
-      if (summaryData.length > 0) {
-        await transaction.dailyAnalytics.createMany({
-          data: summaryData,
-        });
-      }
-    },
-  );
+    }
+  });
 
   const sourceEvents = summaryData.reduce(
-    (total, row) =>
-      total + row.eventCount,
+    (total, row) => total + row.eventCount,
     0,
   );
 
@@ -350,8 +282,7 @@ function resolveDatesToProcess(
   if (options.date) {
     requireDateKey(options.date);
 
-    const currentLocalDate =
-      getCurrentLocalDateKey();
+    const currentLocalDate = getCurrentLocalDateKey();
 
     if (options.date > currentLocalDate) {
       throw new AnalyticsMaintenanceInputError(
@@ -362,8 +293,7 @@ function resolveDatesToProcess(
     return [options.date];
   }
 
-  const numberOfDays =
-    options.days ?? DEFAULT_ROLLUP_DAYS;
+  const numberOfDays = options.days ?? DEFAULT_ROLLUP_DAYS;
 
   if (
     !Number.isInteger(numberOfDays) ||
@@ -375,80 +305,84 @@ function resolveDatesToProcess(
     );
   }
 
-  return getPreviousCompleteDateKeys(
-    numberOfDays,
-  );
+  return getPreviousCompleteDateKeys(numberOfDays);
 }
 
 export async function runAnalyticsMaintenance(
   options: RunAnalyticsMaintenanceOptions = {},
 ) {
-  const dateKeys =
-    resolveDatesToProcess(options);
+  const dateKeys = resolveDatesToProcess(options);
 
-  const summarizedDays: SummarizedDayResult[] =
-    [];
+  const summarizedDays: SummarizedDayResult[] = [];
 
   /*
    * Veritabanına ani yük bindirmemek için
    * günleri sırayla özetliyoruz.
    */
   for (const dateKey of dateKeys) {
-    const result =
-      await summarizeAnalyticsDate(dateKey);
+    const result = await summarizeAnalyticsDate(dateKey);
 
     summarizedDays.push(result);
   }
 
-  const retentionDays = getRetentionDays();
+  const retentionDays = ANALYTICS_RETENTION_DAYS;
 
-  const activeSessionRetentionHours =
-    getActiveSessionRetentionHours();
+  const activeSessionRetentionHours = getActiveSessionRetentionHours();
 
-  const rawEventCutoff = new Date(
-    Date.now() -
-      retentionDays * DAY_IN_MS,
+  /*
+   * Bugün dahil son 7 yerel takvim gününü koru.
+   * Saat bazlı "7 x 24 saat" hesabı günün ilk saatlerini
+   * erken silebildiği için kesim Türkiye gün başlangıcından yapılır.
+   */
+  const oldestRetainedDateKey = addDays(
+    getCurrentLocalDateKey(),
+    -(retentionDays - 1),
   );
+
+  const { dateValue: oldestRetainedDate, startAt: rawEventCutoff } =
+    getUtcRangeForLocalDate(oldestRetainedDateKey);
 
   const activeSessionCutoff = new Date(
-    Date.now() -
-      activeSessionRetentionHours *
-        HOUR_IN_MS,
+    Date.now() - activeSessionRetentionHours * HOUR_IN_MS,
   );
 
-  const [
-    deletedAnalyticsEvents,
-    deletedActiveSessions,
-  ] = await prisma.$transaction([
-    prisma.analyticsEvent.deleteMany({
-      where: {
-        createdAt: {
-          lt: rawEventCutoff,
+  const [deletedAnalyticsEvents, deletedDailyAnalytics, deletedActiveSessions] =
+    await prisma.$transaction([
+      prisma.analyticsEvent.deleteMany({
+        where: {
+          createdAt: {
+            lt: rawEventCutoff,
+          },
         },
-      },
-    }),
+      }),
 
-    prisma.activeSession.deleteMany({
-      where: {
-        lastSeenAt: {
-          lt: activeSessionCutoff,
+      prisma.dailyAnalytics.deleteMany({
+        where: {
+          date: {
+            lt: oldestRetainedDate,
+          },
         },
-      },
-    }),
-  ]);
+      }),
+
+      prisma.activeSession.deleteMany({
+        where: {
+          lastSeenAt: {
+            lt: activeSessionCutoff,
+          },
+        },
+      }),
+    ]);
 
   return {
     ok: true,
-    timezoneOffsetMinutes:
-      getTimezoneOffsetMinutes(),
+    timezoneOffsetMinutes: getTimezoneOffsetMinutes(),
     retentionDays,
     activeSessionRetentionHours,
     summarizedDays,
     deleted: {
-      analyticsEvents:
-        deletedAnalyticsEvents.count,
-      activeSessions:
-        deletedActiveSessions.count,
+      analyticsEvents: deletedAnalyticsEvents.count,
+      dailyAnalytics: deletedDailyAnalytics.count,
+      activeSessions: deletedActiveSessions.count,
     },
   };
 }

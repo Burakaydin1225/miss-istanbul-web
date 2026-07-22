@@ -1,6 +1,4 @@
-import {
-  timingSafeEqual,
-} from "node:crypto";
+import { timingSafeEqual } from "node:crypto";
 
 import { NextResponse } from "next/server";
 
@@ -17,49 +15,41 @@ type MaintenanceRequestBody = {
   days?: unknown;
 };
 
+function getExpectedSecret(): string {
+  return (
+    process.env.CRON_SECRET?.trim() ||
+    process.env.ANALYTICS_MAINTENANCE_SECRET?.trim() ||
+    ""
+  );
+}
+
 function compareSecrets(
   providedSecret: string,
   expectedSecret: string,
 ): boolean {
-  const providedBuffer = Buffer.from(
-    providedSecret,
-  );
+  const providedBuffer = Buffer.from(providedSecret);
 
-  const expectedBuffer = Buffer.from(
-    expectedSecret,
-  );
+  const expectedBuffer = Buffer.from(expectedSecret);
 
-  if (
-    providedBuffer.length !==
-    expectedBuffer.length
-  ) {
+  if (providedBuffer.length !== expectedBuffer.length) {
     return false;
   }
 
-  return timingSafeEqual(
-    providedBuffer,
-    expectedBuffer,
-  );
+  return timingSafeEqual(providedBuffer, expectedBuffer);
 }
 
-function getBearerToken(
-  authorizationHeader: string | null,
-): string {
+function getBearerToken(authorizationHeader: string | null): string {
   if (!authorizationHeader) {
     return "";
   }
 
   const prefix = "Bearer ";
 
-  if (
-    !authorizationHeader.startsWith(prefix)
-  ) {
+  if (!authorizationHeader.startsWith(prefix)) {
     return "";
   }
 
-  return authorizationHeader
-    .slice(prefix.length)
-    .trim();
+  return authorizationHeader.slice(prefix.length).trim();
 }
 
 async function readRequestBody(
@@ -71,38 +61,30 @@ async function readRequestBody(
     return {};
   }
 
-  const parsedBody = JSON.parse(
-    rawBody,
-  ) as unknown;
+  const parsedBody = JSON.parse(rawBody) as unknown;
 
   if (
     !parsedBody ||
     typeof parsedBody !== "object" ||
     Array.isArray(parsedBody)
   ) {
-    throw new AnalyticsMaintenanceInputError(
-      "İstek gövdesi geçersiz.",
-    );
+    throw new AnalyticsMaintenanceInputError("İstek gövdesi geçersiz.");
   }
 
   return parsedBody as MaintenanceRequestBody;
 }
 
-export async function POST(request: Request) {
-  const expectedSecret =
-    process.env
-      .ANALYTICS_MAINTENANCE_SECRET
-      ?.trim();
+function authorizeRequest(request: Request): NextResponse | null {
+  const expectedSecret = getExpectedSecret();
 
   if (!expectedSecret) {
     console.error(
-      "ANALYTICS_MAINTENANCE_SECRET tanımlanmamış.",
+      "CRON_SECRET veya ANALYTICS_MAINTENANCE_SECRET tanımlanmamış.",
     );
 
     return NextResponse.json(
       {
-        error:
-          "Analitik bakım anahtarı yapılandırılmamış.",
+        error: "Analitik bakım anahtarı yapılandırılmamış.",
       },
       {
         status: 500,
@@ -110,17 +92,9 @@ export async function POST(request: Request) {
     );
   }
 
-  const providedSecret = getBearerToken(
-    request.headers.get("authorization"),
-  );
+  const providedSecret = getBearerToken(request.headers.get("authorization"));
 
-  if (
-    !providedSecret ||
-    !compareSecrets(
-      providedSecret,
-      expectedSecret,
-    )
-  ) {
+  if (!providedSecret || !compareSecrets(providedSecret, expectedSecret)) {
     return NextResponse.json(
       {
         error: "Yetkisiz istek.",
@@ -131,14 +105,47 @@ export async function POST(request: Request) {
     );
   }
 
-  try {
-    const body =
-      await readRequestBody(request);
+  return null;
+}
 
-    const date =
-      typeof body.date === "string"
-        ? body.date.trim()
-        : undefined;
+export async function GET(request: Request) {
+  const authorizationError = authorizeRequest(request);
+
+  if (authorizationError) {
+    return authorizationError;
+  }
+
+  try {
+    const result = await runAnalyticsMaintenance({
+      days: 7,
+    });
+
+    return NextResponse.json(result);
+  } catch (error) {
+    console.error("Zamanlanmış analitik bakım işlemi başarısız oldu:", error);
+
+    return NextResponse.json(
+      {
+        error: "Analitik bakım işlemi sırasında hata oluştu.",
+      },
+      {
+        status: 500,
+      },
+    );
+  }
+}
+
+export async function POST(request: Request) {
+  const authorizationError = authorizeRequest(request);
+
+  if (authorizationError) {
+    return authorizationError;
+  }
+
+  try {
+    const body = await readRequestBody(request);
+
+    const date = typeof body.date === "string" ? body.date.trim() : undefined;
 
     let days: number | undefined;
 
@@ -154,18 +161,14 @@ export async function POST(request: Request) {
       days = parsedDays;
     }
 
-    const result =
-      await runAnalyticsMaintenance({
-        date,
-        days,
-      });
+    const result = await runAnalyticsMaintenance({
+      date,
+      days,
+    });
 
     return NextResponse.json(result);
   } catch (error) {
-    if (
-      error instanceof
-      AnalyticsMaintenanceInputError
-    ) {
+    if (error instanceof AnalyticsMaintenanceInputError) {
       return NextResponse.json(
         {
           error: error.message,
@@ -176,15 +179,11 @@ export async function POST(request: Request) {
       );
     }
 
-    console.error(
-      "Analitik bakım işlemi başarısız oldu:",
-      error,
-    );
+    console.error("Analitik bakım işlemi başarısız oldu:", error);
 
     return NextResponse.json(
       {
-        error:
-          "Analitik bakım işlemi sırasında hata oluştu.",
+        error: "Analitik bakım işlemi sırasında hata oluştu.",
       },
       {
         status: 500,

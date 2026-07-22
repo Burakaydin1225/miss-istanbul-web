@@ -21,9 +21,21 @@ type PresignResponse = {
 
 const MAX_SOURCE_FILE_SIZE = 25 * 1024 * 1024;
 const MAX_OUTPUT_SIZE = 8 * 1024 * 1024;
-const MAX_IMAGE_DIMENSION = 2000;
+const TARGET_OUTPUT_SIZE = 450 * 1024;
+const MAX_IMAGE_DIMENSION = 1600;
+const MIN_IMAGE_DIMENSION = 720;
 const MAX_EXTRA_IMAGES = 15;
-const WEBP_QUALITY = 0.84;
+
+const WEBP_QUALITY_LEVELS = [
+  0.72,
+  0.64,
+  0.56,
+  0.48,
+] as const;
+
+const RESIZE_STEP = 0.82;
+const IMMUTABLE_CACHE_CONTROL =
+  "public, max-age=31536000, immutable";
 
 const SUPPORTED_SOURCE_TYPES = new Set([
   "image/jpeg",
@@ -92,36 +104,111 @@ async function optimizeImage(file: File): Promise<File> {
     Math.round(image.naturalHeight * scale),
   );
 
-  const canvas = document.createElement("canvas");
-  canvas.width = width;
-  canvas.height = height;
+  async function createWebpBlob(
+    outputWidth: number,
+    outputHeight: number,
+    quality: number,
+  ): Promise<Blob> {
+    const canvas = document.createElement("canvas");
+    canvas.width = outputWidth;
+    canvas.height = outputHeight;
 
-  const context = canvas.getContext("2d");
+    const context = canvas.getContext("2d");
 
-  if (!context) {
-    throw new Error("Görsel işleme alanı oluşturulamadı.");
+    if (!context) {
+      throw new Error(
+        "Görsel işleme alanı oluşturulamadı.",
+      );
+    }
+
+    context.imageSmoothingEnabled = true;
+    context.imageSmoothingQuality = "high";
+    context.drawImage(
+      image,
+      0,
+      0,
+      outputWidth,
+      outputHeight,
+    );
+
+    return new Promise<Blob>((resolve, reject) => {
+      canvas.toBlob(
+        (result) => {
+          if (!result) {
+            reject(
+              new Error(
+                "Görsel WebP formatına çevrilemedi.",
+              ),
+            );
+            return;
+          }
+
+          resolve(result);
+        },
+        "image/webp",
+        quality,
+      );
+    });
   }
 
-  context.imageSmoothingEnabled = true;
-  context.imageSmoothingQuality = "high";
-  context.drawImage(image, 0, 0, width, height);
+  let outputWidth = width;
+  let outputHeight = height;
+  let blob: Blob | undefined;
 
-  const blob = await new Promise<Blob>((resolve, reject) => {
-    canvas.toBlob(
-      (result) => {
-        if (!result) {
-          reject(
-            new Error("Görsel WebP formatına çevrilemedi."),
-          );
-          return;
-        }
+  while (true) {
+    for (const quality of WEBP_QUALITY_LEVELS) {
+      blob = await createWebpBlob(
+        outputWidth,
+        outputHeight,
+        quality,
+      );
 
-        resolve(result);
-      },
-      "image/webp",
-      WEBP_QUALITY,
+      if (blob.size <= TARGET_OUTPUT_SIZE) {
+        break;
+      }
+    }
+
+    if (!blob) {
+      throw new Error(
+        "Görsel WebP formatına çevrilemedi.",
+      );
+    }
+
+    if (
+      blob.size <= TARGET_OUTPUT_SIZE ||
+      Math.max(outputWidth, outputHeight) <=
+        MIN_IMAGE_DIMENSION
+    ) {
+      break;
+    }
+
+    const currentLongestSide = Math.max(
+      outputWidth,
+      outputHeight,
     );
-  });
+
+    const nextLongestSide = Math.max(
+      MIN_IMAGE_DIMENSION,
+      Math.round(currentLongestSide * RESIZE_STEP),
+    );
+
+    const resizeScale =
+      nextLongestSide / currentLongestSide;
+
+    outputWidth = Math.max(
+      1,
+      Math.round(outputWidth * resizeScale),
+    );
+
+    outputHeight = Math.max(
+      1,
+      Math.round(outputHeight * resizeScale),
+    );
+  }
+
+  if (!blob) {
+    throw new Error("Görsel WebP formatına çevrilemedi.");
+  }
 
   if (blob.size > MAX_OUTPUT_SIZE) {
     throw new Error(
@@ -175,6 +262,7 @@ async function uploadImage(file: File): Promise<string> {
       method: "PUT",
       headers: {
         "Content-Type": optimizedFile.type,
+        "Cache-Control": IMMUTABLE_CACHE_CONTROL,
       },
       body: optimizedFile,
     },

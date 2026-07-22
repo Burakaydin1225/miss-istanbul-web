@@ -114,6 +114,8 @@ export async function POST(
         Bucket: getR2BucketName(),
         Key: key,
         ContentType: contentType,
+        CacheControl:
+          "public, max-age=31536000, immutable",
       });
 
     const uploadUrl =

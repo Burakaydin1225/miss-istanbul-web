@@ -1081,7 +1081,12 @@ export default async function HomePage() {
                                 src={imageUrl}
                                 alt={`${product.name} görsel ${imageIndex + 1}`}
                                 fill
-                                priority={productIndex < 4 && imageIndex === 0}
+                                priority={productIndex === 0 && imageIndex === 0}
+                                loading={
+                                  productIndex === 0 && imageIndex === 0
+                                    ? "eager"
+                                    : "lazy"
+                                }
                                 sizes="(max-width: 640px) 33vw, (max-width: 1024px) 17vw, 9vw"
                                 className="object-cover saturate-[1.12] contrast-[1.04] transition duration-500 group-hover:scale-[1.045] group-hover:saturate-[1.22]"
                               />

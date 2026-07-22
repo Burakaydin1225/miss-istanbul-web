@@ -4,17 +4,13 @@ import { usePathname } from "next/navigation";
 import { useEffect } from "react";
 
 import {
-  hasTrackedSessionEvent,
   isPublicAnalyticsPath,
   trackAnalyticsEvent,
   type PublicAnalyticsEventType,
 } from "@/lib/analytics-client";
 
 type AnalyticsTrackerProps = {
-  eventType: Extract<
-    PublicAnalyticsEventType,
-    "PAGE_VIEW" | "PRODUCT_VIEW"
-  >;
+  eventType: Extract<PublicAnalyticsEventType, "PAGE_VIEW" | "PRODUCT_VIEW">;
   productId?: string;
   heartbeat?: boolean;
 };
@@ -27,29 +23,21 @@ export function AnalyticsTracker({
   const pathname = usePathname();
 
   useEffect(() => {
-    if (
-      !pathname ||
-      !isPublicAnalyticsPath(pathname)
-    ) {
+    if (!pathname || !isPublicAnalyticsPath(pathname)) {
       return;
     }
 
-    const uniqueEventKey = [
+    /*
+     * Her gerçek sayfa geçişini kaydet. React geliştirme
+     * modundaki çift effect ve çok hızlı yenilemeler API'deki
+     * kısa süreli tekrar kontrolüyle engellenir. Oturum boyunca
+     * aynı yolu tamamen susturmak geri dönüşleri eksik sayıyordu.
+     */
+    void trackAnalyticsEvent({
       eventType,
-      pathname,
-      productId || "general",
-    ].join(":");
-
-    const alreadyTracked =
-      hasTrackedSessionEvent(uniqueEventKey);
-
-    if (!alreadyTracked) {
-      void trackAnalyticsEvent({
-        eventType,
-        path: pathname,
-        productId,
-      });
-    }
+      path: pathname,
+      productId,
+    });
 
     if (!heartbeat) {
       return;
@@ -66,10 +54,7 @@ export function AnalyticsTracker({
       });
     };
 
-    const intervalId = window.setInterval(
-      sendHeartbeat,
-      30_000,
-    );
+    const intervalId = window.setInterval(sendHeartbeat, 30_000);
 
     const handleVisibilityChange = () => {
       if (document.visibilityState === "visible") {
@@ -81,35 +66,18 @@ export function AnalyticsTracker({
       sendHeartbeat();
     };
 
-    document.addEventListener(
-      "visibilitychange",
-      handleVisibilityChange,
-    );
+    document.addEventListener("visibilitychange", handleVisibilityChange);
 
-    window.addEventListener(
-      "focus",
-      handleFocus,
-    );
+    window.addEventListener("focus", handleFocus);
 
     return () => {
       window.clearInterval(intervalId);
 
-      document.removeEventListener(
-        "visibilitychange",
-        handleVisibilityChange,
-      );
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
 
-      window.removeEventListener(
-        "focus",
-        handleFocus,
-      );
+      window.removeEventListener("focus", handleFocus);
     };
-  }, [
-    eventType,
-    heartbeat,
-    pathname,
-    productId,
-  ]);
+  }, [eventType, heartbeat, pathname, productId]);
 
   return null;
 }
