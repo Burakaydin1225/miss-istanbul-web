@@ -1,11 +1,17 @@
 import type { NextConfig } from "next";
 
-const canonicalHost = "www.beylikduzu24.com";
+const canonicalHost = "www.beylikduzu25.com";
 
 const remotePatterns: NonNullable<NextConfig["images"]>["remotePatterns"] = [
   {
     protocol: "https",
     hostname: "images.unsplash.com",
+    port: "",
+    pathname: "/**",
+  },
+  {
+    protocol: "https",
+    hostname: "media.beylikduzu25.com",
     port: "",
     pathname: "/**",
   },
@@ -17,12 +23,14 @@ if (r2PublicUrl) {
   try {
     const parsedR2Url = new URL(r2PublicUrl);
 
-    remotePatterns.push({
-      protocol: "https",
-      hostname: parsedR2Url.hostname,
-      port: "",
-      pathname: "/**",
-    });
+    if (parsedR2Url.hostname !== "media.beylikduzu24.com") {
+      remotePatterns.push({
+        protocol: "https",
+        hostname: parsedR2Url.hostname,
+        port: "",
+        pathname: "/**",
+      });
+    }
   } catch {
     console.warn(
       "R2_PUBLIC_URL geçersiz olduğu için image remotePatterns içine eklenmedi.",
@@ -65,6 +73,17 @@ const nextConfig: NextConfig = {
           {
             type: "host",
             value: "beylikduzu24.com",
+          },
+        ],
+        destination: `https://${canonicalHost}/:path*`,
+        permanent: true,
+      },
+      {
+        source: "/:path*",
+        has: [
+          {
+            type: "host",
+            value: "www.beylikduzu24.com",
           },
         ],
         destination: `https://${canonicalHost}/:path*`,
