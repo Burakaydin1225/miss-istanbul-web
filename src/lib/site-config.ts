@@ -1,6 +1,6 @@
 import { productRegions } from "./product-regions";
 
-const DEFAULT_SITE_URL = "https://www.beylikduzu24.com";
+const DEFAULT_SITE_URL = "https://www.beylikduzu25.com";
 
 function normalizeSiteUrl(value: string): string {
   const trimmedValue = value.trim();
@@ -17,8 +17,11 @@ function normalizeSiteUrl(value: string): string {
   try {
     const parsedUrl = new URL(withProtocol);
 
-    if (parsedUrl.hostname === "beylikduzu24.com") {
-      parsedUrl.hostname = "www.beylikduzu24.com";
+    if (
+      parsedUrl.hostname === "beylikduzu24.com" ||
+      parsedUrl.hostname === "www.beylikduzu24.com"
+    ) {
+      parsedUrl.hostname = "www.beylikduzu25.com";
     }
 
     if (

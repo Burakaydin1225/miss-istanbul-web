@@ -2,6 +2,7 @@ import {
   DeleteObjectsCommand,
   S3Client,
 } from "@aws-sdk/client-s3";
+import { CANONICAL_R2_URL, normalizeMediaUrl } from "@/lib/media-url";
 
 let client: S3Client | undefined;
 
@@ -43,7 +44,7 @@ export function getR2BucketName(): string {
 }
 
 function getR2PublicUrl(): string {
-  return getRequiredEnv("R2_PUBLIC_URL").replace(/\/+$/, "");
+  return CANONICAL_R2_URL;
 }
 
 export function createR2PublicUrl(key: string): string {
@@ -60,7 +61,7 @@ export function getR2KeyFromPublicUrl(
 ): string | null {
   try {
     const publicUrl = new URL(getR2PublicUrl());
-    const candidateUrl = new URL(fileUrl);
+    const candidateUrl = new URL(normalizeMediaUrl(fileUrl));
 
     if (candidateUrl.origin !== publicUrl.origin) {
       return null;
