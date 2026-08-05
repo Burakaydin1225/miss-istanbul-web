@@ -257,41 +257,77 @@ function getCategoryNeonTheme(categoryValue: string) {
   switch (categoryValue) {
     case "VIP":
       return {
-        accent: "#d946ef",
-        titleColor: "#f5b8ff",
+        accent: "#f0abfc",
+        secondary: "#d946ef",
+        tertiary: "#f59e0b",
+        titleColor: "#fff4ff",
         titleBackground:
-          "linear-gradient(90deg, #050505 0%, #2b0730 55%, #050505 100%)",
-        glow: "0 0 0 1px rgba(217,70,239,0.22), 0 0 22px rgba(217,70,239,0.32)",
+          "linear-gradient(90deg, #120014 0%, #3b0a46 48%, #120014 100%)",
+        frameBackground:
+          "linear-gradient(135deg, #4a044e 0%, #d946ef 28%, #f0abfc 47%, #f59e0b 58%, #7e22ce 76%, #25002b 100%)",
+        glow:
+          "0 0 0 1px rgba(240,171,252,0.38), 0 0 28px rgba(217,70,239,0.52), 0 18px 42px rgba(88,28,135,0.28)",
         hoverGlow:
-          "0 0 0 1px rgba(217,70,239,0.32), 0 0 34px rgba(217,70,239,0.5)",
-        divider: "rgba(217,70,239,0.55)",
+          "0 0 0 1px rgba(255,255,255,0.48), 0 0 42px rgba(217,70,239,0.76), 0 24px 54px rgba(88,28,135,0.34)",
+        divider: "rgba(240,171,252,0.72)",
         icon: "👑",
+        cornerLabel: "VIP",
+        cornerIcon: "♛",
+        cornerBackground:
+          "linear-gradient(135deg, rgba(15,0,18,0.96), rgba(126,34,206,0.94) 56%, rgba(245,158,11,0.92))",
+        cardOverlay:
+          "linear-gradient(145deg, rgba(240,171,252,0.18), transparent 34%, rgba(245,158,11,0.12) 72%, transparent)",
+        beamDuration: "4.8s",
       };
 
     case "PREMIUM":
       return {
-        accent: "#00d9ff",
-        titleColor: "#a7f3ff",
+        accent: "#67e8f9",
+        secondary: "#06b6d4",
+        tertiary: "#8b5cf6",
+        titleColor: "#ecfeff",
         titleBackground:
-          "linear-gradient(90deg, #050505 0%, #032636 55%, #050505 100%)",
-        glow: "0 0 0 1px rgba(0,217,255,0.22), 0 0 22px rgba(0,217,255,0.3)",
+          "linear-gradient(90deg, #00141a 0%, #073344 48%, #00141a 100%)",
+        frameBackground:
+          "linear-gradient(135deg, #083344 0%, #06b6d4 28%, #67e8f9 48%, #8b5cf6 61%, #164e63 79%, #001419 100%)",
+        glow:
+          "0 0 0 1px rgba(103,232,249,0.32), 0 0 24px rgba(6,182,212,0.44), 0 16px 38px rgba(8,51,68,0.22)",
         hoverGlow:
-          "0 0 0 1px rgba(0,217,255,0.32), 0 0 34px rgba(0,217,255,0.48)",
-        divider: "rgba(0,217,255,0.55)",
+          "0 0 0 1px rgba(255,255,255,0.42), 0 0 36px rgba(6,182,212,0.66), 0 22px 48px rgba(76,29,149,0.24)",
+        divider: "rgba(103,232,249,0.66)",
         icon: "💎",
+        cornerLabel: "PREMIUM",
+        cornerIcon: "◆",
+        cornerBackground:
+          "linear-gradient(135deg, rgba(0,20,26,0.96), rgba(8,145,178,0.94) 58%, rgba(124,58,237,0.9))",
+        cardOverlay:
+          "linear-gradient(145deg, rgba(103,232,249,0.16), transparent 38%, rgba(139,92,246,0.12) 76%, transparent)",
+        beamDuration: "5.4s",
       };
 
     default:
       return {
-        accent: "#ffd600",
-        titleColor: "#fff28a",
+        accent: "#fde68a",
+        secondary: "#f59e0b",
+        tertiary: "#b45309",
+        titleColor: "#fff8d6",
         titleBackground:
-          "linear-gradient(90deg, #050505 0%, #332900 55%, #050505 100%)",
-        glow: "0 0 0 1px rgba(255,214,0,0.22), 0 0 22px rgba(255,214,0,0.3)",
+          "linear-gradient(90deg, #171000 0%, #4a3100 48%, #171000 100%)",
+        frameBackground:
+          "linear-gradient(135deg, #3f2a00 0%, #d97706 27%, #fde68a 49%, #f59e0b 60%, #92400e 78%, #211200 100%)",
+        glow:
+          "0 0 0 1px rgba(253,230,138,0.32), 0 0 24px rgba(245,158,11,0.42), 0 16px 38px rgba(120,53,15,0.22)",
         hoverGlow:
-          "0 0 0 1px rgba(255,214,0,0.32), 0 0 34px rgba(255,214,0,0.48)",
-        divider: "rgba(255,214,0,0.55)",
+          "0 0 0 1px rgba(255,255,255,0.4), 0 0 36px rgba(245,158,11,0.62), 0 22px 48px rgba(120,53,15,0.26)",
+        divider: "rgba(253,230,138,0.66)",
         icon: "⚜️",
+        cornerLabel: "GOLD",
+        cornerIcon: "✦",
+        cornerBackground:
+          "linear-gradient(135deg, rgba(28,18,0,0.97), rgba(180,83,9,0.94) 58%, rgba(245,158,11,0.92))",
+        cardOverlay:
+          "linear-gradient(145deg, rgba(253,230,138,0.15), transparent 38%, rgba(180,83,9,0.11) 76%, transparent)",
+        beamDuration: "5.8s",
       };
   }
 }
@@ -487,32 +523,7 @@ export default async function HomePage() {
     visibleProducts.map((product, index) => [product.id, index]),
   );
 
-  /*
-   * Sayfada görüntülenen ilk 10 gerçek ilanı
-   * sponsorlu olarak işaretliyoruz.
-   *
-   * Reklam alanları sayılmaz; kategori ve kart
-   * sıralaması ekrandaki görünümle aynı tutulur.
-   */
-  const sponsoredProductIds = new Set<string>();
 
-  for (const category of groupedCategories) {
-    for (const item of category.items) {
-      if (item.type !== "product") {
-        continue;
-      }
-
-      if (sponsoredProductIds.size >= 10) {
-        break;
-      }
-
-      sponsoredProductIds.add(item.product.id);
-    }
-
-    if (sponsoredProductIds.size >= 10) {
-      break;
-    }
-  }
 
   const dailySeed = createDailySeed(now);
   const weeklySeed = createWeeklySeed(now);
@@ -605,7 +616,7 @@ export default async function HomePage() {
   };
 
   const announcementText =
-    "✦ Güncel ilanlar sürekli yenilenmektedir • Reklam ve yayın bilgisi için WhatsApp üzerinden iletişime geçebilirsiniz •";
+    "✦ Sitemizdeki üyelerimizin hiçbirisi önden ödeme istememektedir • Reklam ve yayın bilgisi için WhatsApp üzerinden iletişime geçebilirsiniz •";
 
   return (
     <div className="min-h-screen bg-[#f4f4f0]">
@@ -682,6 +693,20 @@ export default async function HomePage() {
               }
             }
 
+            @keyframes product-card-sheen {
+              0%, 72% {
+                transform: translateX(-135%) skewX(-18deg);
+                opacity: 0;
+              }
+              78% {
+                opacity: 0.78;
+              }
+              100% {
+                transform: translateX(165%) skewX(-18deg);
+                opacity: 0;
+              }
+            }
+
             .site-gold-title {
               display: inline-block;
               background-size: 240% auto;
@@ -723,8 +748,28 @@ export default async function HomePage() {
               width: 190%;
               aspect-ratio: 1 / 1;
               transform-origin: center;
-              animation: product-border-beam-travel 5.2s linear infinite;
+              animation-name: product-border-beam-travel;
+              animation-timing-function: linear;
+              animation-iteration-count: infinite;
               will-change: transform;
+            }
+
+            .product-card-sheen {
+              pointer-events: none;
+              position: absolute;
+              inset: -20% auto -20% -30%;
+              z-index: 20;
+              width: 34%;
+              background: linear-gradient(
+                90deg,
+                transparent,
+                rgba(255,255,255,0.12),
+                rgba(255,255,255,0.72),
+                rgba(255,255,255,0.14),
+                transparent
+              );
+              filter: blur(1px);
+              animation: product-card-sheen 6.8s ease-in-out infinite;
             }
 
           `,
@@ -964,8 +1009,6 @@ export default async function HomePage() {
 
                     const product = item.product;
 
-                    const isSponsored = sponsoredProductIds.has(product.id);
-
                     const productIndex =
                       productIndexById.get(product.id) ?? 999;
 
@@ -1004,9 +1047,9 @@ export default async function HomePage() {
                         key={product.id}
                         href={`/urun/${product.slug}`}
                         aria-label={`${product.name} ilanını görüntüle`}
-                        className="group relative block overflow-hidden rounded-[16px] p-[2px] transition duration-200 hover:-translate-y-0.5 active:scale-[0.99] sm:rounded-[18px]"
+                        className="group relative block overflow-hidden rounded-[18px] p-[2px] transition duration-300 hover:-translate-y-1 active:scale-[0.99] sm:rounded-[21px]"
                         style={{
-                          backgroundColor: neonTheme.accent,
+                          background: neonTheme.frameBackground,
                           boxShadow: neonTheme.glow,
                         }}
                       >
@@ -1027,42 +1070,67 @@ export default async function HomePage() {
                               ${neonTheme.accent}55 358deg,
                               transparent 360deg
                             )`,
-                            filter: `drop-shadow(0 0 6px ${neonTheme.accent}) drop-shadow(0 0 15px ${neonTheme.accent})`,
+                            filter: `drop-shadow(0 0 6px ${neonTheme.accent}) drop-shadow(0 0 16px ${neonTheme.secondary})`,
+                            animationDuration: neonTheme.beamDuration,
                           }}
                         />
 
-                        <div className="relative z-10 overflow-hidden rounded-[14px] bg-neutral-950 sm:rounded-[16px]">
-                          <div
-                          className="relative flex items-center justify-between gap-2 overflow-hidden border-b px-3 py-1.5 sm:px-4 sm:py-2 lg:py-2.5"
-                          style={{
-                            background: neonTheme.titleBackground,
-                            borderColor: neonTheme.divider,
-                          }}
-                        >
-                          <h3
-                            className="relative min-w-0 flex-1 line-clamp-1 text-[13px] font-black tracking-[0.01em] sm:text-sm"
+                        <div className="relative z-10 overflow-hidden rounded-[16px] bg-neutral-950 sm:rounded-[19px]">
+                          <span aria-hidden="true" className="product-card-sheen" />
+
+                          <span
+                            aria-hidden="true"
+                            className="pointer-events-none absolute inset-0 z-[15]"
                             style={{
-                              color: neonTheme.titleColor,
-                              textShadow: `0 0 8px ${neonTheme.accent}, 0 0 16px ${neonTheme.accent}88`,
+                              background: neonTheme.cardOverlay,
+                            }}
+                          />
+
+                          <div
+                            className="relative flex min-h-[34px] items-center gap-2 overflow-hidden border-b px-2.5 py-1.5 sm:min-h-[40px] sm:px-3 sm:py-2 lg:min-h-[42px]"
+                            style={{
+                              background: neonTheme.titleBackground,
+                              borderColor: neonTheme.divider,
                             }}
                           >
-                            {product.name}
-                          </h3>
-
-                          {product.cardTag ? (
                             <span
-                              className="max-w-[58%] shrink-0 whitespace-normal break-words rounded-full border px-2 py-1 text-center text-[7px] font-black uppercase leading-[1.05] tracking-[0.035em] text-white shadow-lg sm:max-w-[54%] sm:px-3 sm:text-[9px] sm:leading-tight sm:tracking-[0.06em] lg:max-w-[46%] lg:truncate lg:whitespace-nowrap xl:max-w-[50%]"
+                              aria-hidden="true"
+                              className="inline-flex shrink-0 items-center gap-1 rounded-full border border-white/25 px-2 py-1 text-[8px] font-black uppercase tracking-[0.12em] text-white backdrop-blur-md sm:px-2.5 sm:text-[9px]"
                               style={{
-                                borderColor: `${neonTheme.accent}99`,
-                                background: `linear-gradient(135deg, ${neonTheme.accent}, rgba(0,0,0,0.92))`,
-                                boxShadow: `0 0 14px ${neonTheme.accent}80`,
+                                background: neonTheme.cornerBackground,
+                                boxShadow: `0 0 14px ${neonTheme.secondary}70`,
                               }}
-                              title={product.cardTag}
                             >
-                              {product.cardTag}
+                              <span className="text-[10px] leading-none sm:text-xs">
+                                {neonTheme.cornerIcon}
+                              </span>
+                              {neonTheme.cornerLabel}
                             </span>
-                          ) : null}
-                        </div>
+
+                            <h3
+                              className="relative min-w-0 flex-1 truncate text-[12px] font-black tracking-[0.01em] sm:text-sm"
+                              style={{
+                                color: neonTheme.titleColor,
+                                textShadow: `0 0 8px ${neonTheme.accent}, 0 0 16px ${neonTheme.accent}88`,
+                              }}
+                            >
+                              {product.name}
+                            </h3>
+
+                            {product.cardTag ? (
+                              <span
+                                className="max-w-[36%] shrink-0 truncate rounded-full border px-2 py-1 text-center text-[7px] font-black uppercase leading-none tracking-[0.035em] text-white shadow-lg sm:max-w-[40%] sm:px-2.5 sm:text-[8px] sm:tracking-[0.055em] lg:max-w-[38%]"
+                                style={{
+                                  borderColor: `${neonTheme.accent}99`,
+                                  background: `linear-gradient(135deg, ${neonTheme.accent}, rgba(0,0,0,0.92))`,
+                                  boxShadow: `0 0 12px ${neonTheme.accent}70`,
+                                }}
+                                title={product.cardTag}
+                              >
+                                {product.cardTag}
+                              </span>
+                            ) : null}
+                          </div>
 
                         <div className="relative grid grid-cols-3 overflow-hidden">
                           {productImageUrls.map((imageUrl, imageIndex) => (
@@ -1101,16 +1169,6 @@ export default async function HomePage() {
                             </div>
                           ))}
 
-                          {isSponsored ? (
-                            <div
-                              aria-hidden="true"
-                              className="pointer-events-none absolute inset-0 z-10 flex items-center justify-center"
-                            >
-                              <span className="rounded-full border border-amber-100/25 bg-black/25 px-4 py-1.5 text-[12px] font-black uppercase tracking-[0.26em] text-amber-200/60 shadow-[0_0_18px_rgba(245,158,11,0.22)] backdrop-blur-[1px] sm:px-5 sm:py-2 sm:text-[14px]">
-                                SPONSORLU
-                              </span>
-                            </div>
-                          ) : null}
                         </div>
                         </div>
                       </Link>
