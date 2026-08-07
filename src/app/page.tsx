@@ -266,9 +266,9 @@ function getCategoryNeonTheme(categoryValue: string) {
         frameBackground:
           "linear-gradient(135deg, #4a044e 0%, #d946ef 28%, #f0abfc 47%, #f59e0b 58%, #7e22ce 76%, #25002b 100%)",
         glow:
-          "0 0 0 1px rgba(240,171,252,0.38), 0 0 28px rgba(217,70,239,0.52), 0 18px 42px rgba(88,28,135,0.28)",
+          "0 0 0 1px rgba(240,171,252,0.34), 0 10px 24px rgba(88,28,135,0.18)",
         hoverGlow:
-          "0 0 0 1px rgba(255,255,255,0.48), 0 0 42px rgba(217,70,239,0.76), 0 24px 54px rgba(88,28,135,0.34)",
+          "0 0 0 1px rgba(255,255,255,0.42), 0 14px 30px rgba(126,34,206,0.24)",
         divider: "rgba(240,171,252,0.72)",
         icon: "👑",
         cornerLabel: "VIP",
@@ -277,7 +277,6 @@ function getCategoryNeonTheme(categoryValue: string) {
           "linear-gradient(135deg, rgba(15,0,18,0.96), rgba(126,34,206,0.94) 56%, rgba(245,158,11,0.92))",
         cardOverlay:
           "linear-gradient(145deg, rgba(240,171,252,0.18), transparent 34%, rgba(245,158,11,0.12) 72%, transparent)",
-        beamDuration: "4.8s",
       };
 
     case "PREMIUM":
@@ -291,9 +290,9 @@ function getCategoryNeonTheme(categoryValue: string) {
         frameBackground:
           "linear-gradient(135deg, #083344 0%, #06b6d4 28%, #67e8f9 48%, #8b5cf6 61%, #164e63 79%, #001419 100%)",
         glow:
-          "0 0 0 1px rgba(103,232,249,0.32), 0 0 24px rgba(6,182,212,0.44), 0 16px 38px rgba(8,51,68,0.22)",
+          "0 0 0 1px rgba(103,232,249,0.30), 0 10px 24px rgba(8,51,68,0.16)",
         hoverGlow:
-          "0 0 0 1px rgba(255,255,255,0.42), 0 0 36px rgba(6,182,212,0.66), 0 22px 48px rgba(76,29,149,0.24)",
+          "0 0 0 1px rgba(255,255,255,0.38), 0 14px 30px rgba(8,145,178,0.22)",
         divider: "rgba(103,232,249,0.66)",
         icon: "💎",
         cornerLabel: "PREMIUM",
@@ -302,7 +301,6 @@ function getCategoryNeonTheme(categoryValue: string) {
           "linear-gradient(135deg, rgba(0,20,26,0.96), rgba(8,145,178,0.94) 58%, rgba(124,58,237,0.9))",
         cardOverlay:
           "linear-gradient(145deg, rgba(103,232,249,0.16), transparent 38%, rgba(139,92,246,0.12) 76%, transparent)",
-        beamDuration: "5.4s",
       };
 
     default:
@@ -316,9 +314,9 @@ function getCategoryNeonTheme(categoryValue: string) {
         frameBackground:
           "linear-gradient(135deg, #3f2a00 0%, #d97706 27%, #fde68a 49%, #f59e0b 60%, #92400e 78%, #211200 100%)",
         glow:
-          "0 0 0 1px rgba(253,230,138,0.32), 0 0 24px rgba(245,158,11,0.42), 0 16px 38px rgba(120,53,15,0.22)",
+          "0 0 0 1px rgba(253,230,138,0.30), 0 10px 24px rgba(120,53,15,0.16)",
         hoverGlow:
-          "0 0 0 1px rgba(255,255,255,0.4), 0 0 36px rgba(245,158,11,0.62), 0 22px 48px rgba(120,53,15,0.26)",
+          "0 0 0 1px rgba(255,255,255,0.36), 0 14px 30px rgba(180,83,9,0.22)",
         divider: "rgba(253,230,138,0.66)",
         icon: "⚜️",
         cornerLabel: "GOLD",
@@ -327,7 +325,6 @@ function getCategoryNeonTheme(categoryValue: string) {
           "linear-gradient(135deg, rgba(28,18,0,0.97), rgba(180,83,9,0.94) 58%, rgba(245,158,11,0.92))",
         cardOverlay:
           "linear-gradient(145deg, rgba(253,230,138,0.15), transparent 38%, rgba(180,83,9,0.11) 76%, transparent)",
-        beamDuration: "5.8s",
       };
   }
 }
@@ -616,7 +613,7 @@ export default async function HomePage() {
   };
 
   const announcementText =
-    "✦ Sitemizdeki üyelerimizin hiçbirisi önden ödeme istememektedir • Reklam ve yayın bilgisi için WhatsApp üzerinden iletişime geçebilirsiniz •";
+    "✦ Güncel ilanlar sürekli yenilenmektedir • Reklam ve yayın bilgisi için WhatsApp üzerinden iletişime geçebilirsiniz •";
 
   return (
     <div className="min-h-screen bg-[#f4f4f0]">
@@ -684,29 +681,6 @@ export default async function HomePage() {
               }
             }
 
-            @keyframes product-border-beam-travel {
-              0% {
-                transform: translate(-50%, -50%) rotate(0deg);
-              }
-              100% {
-                transform: translate(-50%, -50%) rotate(360deg);
-              }
-            }
-
-            @keyframes product-card-sheen {
-              0%, 72% {
-                transform: translateX(-135%) skewX(-18deg);
-                opacity: 0;
-              }
-              78% {
-                opacity: 0.78;
-              }
-              100% {
-                transform: translateX(165%) skewX(-18deg);
-                opacity: 0;
-              }
-            }
-
             .site-gold-title {
               display: inline-block;
               background-size: 240% auto;
@@ -738,38 +712,26 @@ export default async function HomePage() {
               flex: 0 0 auto;
               white-space: nowrap;
             }
-
-            .product-border-beam {
-              pointer-events: none;
-              position: absolute;
-              left: 50%;
-              top: 50%;
-              z-index: 0;
-              width: 190%;
-              aspect-ratio: 1 / 1;
-              transform-origin: center;
-              animation-name: product-border-beam-travel;
-              animation-timing-function: linear;
-              animation-iteration-count: infinite;
-              will-change: transform;
-            }
-
             .product-card-sheen {
               pointer-events: none;
               position: absolute;
-              inset: -20% auto -20% -30%;
+              inset: 0;
               z-index: 20;
-              width: 34%;
+              opacity: 0;
               background: linear-gradient(
-                90deg,
-                transparent,
-                rgba(255,255,255,0.12),
-                rgba(255,255,255,0.72),
-                rgba(255,255,255,0.14),
-                transparent
+                115deg,
+                transparent 0%,
+                rgba(255,255,255,0.05) 42%,
+                rgba(255,255,255,0.16) 50%,
+                transparent 58%
               );
-              filter: blur(1px);
-              animation: product-card-sheen 6.8s ease-in-out infinite;
+              transition: opacity 160ms ease;
+            }
+
+            @media (hover: hover) and (pointer: fine) {
+              .group:hover .product-card-sheen {
+                opacity: 1;
+              }
             }
 
           `,
@@ -956,7 +918,7 @@ export default async function HomePage() {
                                 background: advertisementTheme.icon,
                               }}
                             >
-                              <div className="flex size-13 items-center justify-center rounded-2xl border border-white/60 bg-black/15 text-white shadow-lg backdrop-blur-sm transition group-hover:scale-105">
+                              <div className="flex size-13 items-center justify-center rounded-2xl border border-white/60 bg-black/15 text-white shadow-lg backdrop-blur-[2px] transition group-hover:scale-105">
                                 <svg
                                   viewBox="0 0 24 24"
                                   aria-hidden="true"
@@ -1047,33 +1009,12 @@ export default async function HomePage() {
                         key={product.id}
                         href={`/urun/${product.slug}`}
                         aria-label={`${product.name} ilanını görüntüle`}
-                        className="group relative block overflow-hidden rounded-[18px] p-[2px] transition duration-300 hover:-translate-y-1 active:scale-[0.99] sm:rounded-[21px]"
+                        className="group relative block overflow-hidden rounded-[18px] p-[2px] transition duration-200 md:hover:-translate-y-0.5 active:scale-[0.995] sm:rounded-[21px]"
                         style={{
                           background: neonTheme.frameBackground,
                           boxShadow: neonTheme.glow,
                         }}
                       >
-                        <span
-                          aria-hidden="true"
-                          className="product-border-beam"
-                          style={{
-                            background: `conic-gradient(
-                              from 0deg,
-                              transparent 0deg,
-                              transparent 258deg,
-                              ${neonTheme.accent}10 274deg,
-                              ${neonTheme.accent}30 292deg,
-                              ${neonTheme.accent}75 314deg,
-                              ${neonTheme.accent} 332deg,
-                              #ffffff 344deg,
-                              ${neonTheme.accent} 353deg,
-                              ${neonTheme.accent}55 358deg,
-                              transparent 360deg
-                            )`,
-                            filter: `drop-shadow(0 0 6px ${neonTheme.accent}) drop-shadow(0 0 16px ${neonTheme.secondary})`,
-                            animationDuration: neonTheme.beamDuration,
-                          }}
-                        />
 
                         <div className="relative z-10 overflow-hidden rounded-[16px] bg-neutral-950 sm:rounded-[19px]">
                           <span aria-hidden="true" className="product-card-sheen" />
@@ -1095,7 +1036,7 @@ export default async function HomePage() {
                           >
                             <span
                               aria-hidden="true"
-                              className="inline-flex shrink-0 items-center gap-1 rounded-full border border-white/25 px-2 py-1 text-[8px] font-black uppercase tracking-[0.12em] text-white backdrop-blur-md sm:px-2.5 sm:text-[9px]"
+                              className="inline-flex shrink-0 items-center gap-1 rounded-full border border-white/25 px-2 py-1 text-[8px] font-black uppercase tracking-[0.12em] text-white backdrop-blur-[2px] sm:px-2.5 sm:text-[9px]"
                               style={{
                                 background: neonTheme.cornerBackground,
                                 boxShadow: `0 0 14px ${neonTheme.secondary}70`,
@@ -1156,7 +1097,7 @@ export default async function HomePage() {
                                     : "lazy"
                                 }
                                 sizes="(max-width: 640px) 33vw, (max-width: 1024px) 17vw, 9vw"
-                                className="object-cover saturate-[1.12] contrast-[1.04] transition duration-500 group-hover:scale-[1.045] group-hover:saturate-[1.22]"
+                                className="object-cover saturate-[1.08] contrast-[1.03] transition duration-200 md:group-hover:scale-[1.02]"
                               />
 
                               <div
